@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOA - LOST OF ALL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { box-sizing: border-box; }
+        body { margin:0; font-family:'Unbounded', sans-serif; background:#000; color:#fff; }
+        h1, h2, h3 { font-family:'Oswald', sans-serif; text-transform:uppercase; letter-spacing:4px; font-weight:700; }
+
+        .nav {
+            position:fixed; top:0; left:0; right:0; height:66px; background:rgba(245,245,245,0.98);
+            display:flex; align-items:center; justify-content:space-between; padding:0 30px; z-index:1000;
+            color:#000; box-shadow:0 2px 10px rgba(0,0,0,0.1);
+        }
+        .logo { font-size:26px; font-weight:700; }
+        .menu a { margin:0 18px; color:#000; text-decoration:none; font-weight:600; }
+        .icons span { font-size:24px; margin-left:20px; cursor:pointer; }
+
+        .cover { height:100vh; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; text-align:center; position:relative; }
+        .cover::after { content:""; position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)); }
+        .cover-content { position:relative; z-index:2; color:#fff; }
+
+        #cover-wings { opacity:0; transition: opacity 2.8s ease-out; }
+        #cover-wings.visible { opacity:1; }
+
+        .catalog { padding:140px 20px; background:#fff; color:#000; }
+        .product-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:40px; max-width:1200px; margin:0 auto; }
+        .product {
+            background:#fff; border:1px solid #eee; border-radius:12px; overflow:hidden; position:relative; text-align:center; cursor:pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .product:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+        .product img { width:100%; height:320px; object-fit:cover; }
+        .product-info { padding:20px 15px; }
+        .product h3 { margin:10px 0 8px; font-size:21px; }
+        .price { font-size:22px; font-weight:700; }
+        .old-price { text-decoration:line-through; color:#888; }
+
+        .wishlist-heart {
+            position:absolute; top:15px; right:15px; font-size:24px; cursor:pointer; color:rgba(255,255,255,0.85); transition:0.3s;
+            z-index:10;
+        }
+        .wishlist-heart.liked { color:#ff2d55; }
+
+        .btn { padding:14px 32px; background:#000; color:#fff; border:none; border-radius:50px; font-weight:600; cursor:pointer; margin-top:12px; font-family:'Unbounded', sans-serif; }
+        .btn:hover { background:#222; }
+
+        .marquee { background:#000; color:#fff; padding:16px 0; overflow:hidden; white-space:nowrap; font-size:20px; }
+        .marquee-content { display:inline-block; padding-left:100%; animation:marquee 15s linear infinite; }
+        @keyframes marquee { from {transform:translateX(0);} to {transform:translateX(-50%);} }
+
+        .slider { position:relative; height:90vh; overflow:hidden; }
+        .slides { display:flex; height:100%; transition:transform 1s ease; }
+        .slide { min-width:100%; background-size:cover; background-position:center; position:relative; }
+        .slide::after { content:""; position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)); }
+
+        #cart-sidebar {
+            position:fixed; top:0; right:-440px; width:420px; height:100vh; background:#fff; color:#000;
+            box-shadow:-10px 0 30px rgba(0,0,0,0.4); transition:right 0.5s ease; z-index:3000; padding:30px; overflow:auto;
+        }
+        #cart-sidebar.open { right:0; }
+
+        /* ===== PRODUCT MODAL ===== */
+        .product-modal-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:4000;
+            display:none; align-items:flex-start; justify-content:center;
+            padding:20px; overflow-y:auto;
+        }
+        .product-modal-overlay.open { display:flex; }
+
+        .product-modal {
+            background:#fff; color:#000; border-radius:16px; max-width:900px; width:100%;
+            margin:auto; overflow:hidden; position:relative;
+            animation: modalIn 0.35s ease;
+        }
+        @keyframes modalIn { from {opacity:0; transform:translateY(30px);} to {opacity:1; transform:translateY(0);} }
+
+        .modal-close {
+            position:absolute; top:16px; right:20px; font-size:36px; cursor:pointer; color:#000; z-index:10; line-height:1;
+            background:rgba(255,255,255,0.8); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+        }
+
+        .modal-body { display:flex; flex-direction:row; }
+
+        /* Left: photo slider */
+        .modal-photos { flex:1; min-width:0; position:relative; background:#f5f5f5; }
+        .modal-main-photo { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
+        .modal-arrow {
+            position:absolute; top:50%; transform:translateY(-50%);
+            background:rgba(255,255,255,0.9); border:none; border-radius:50%;
+            width:38px; height:38px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+            box-shadow:0 2px 10px rgba(0,0,0,0.15);
+        }
+        .modal-arrow.left { left:12px; }
+        .modal-arrow.right { right:12px; }
+
+        .modal-thumbs { display:flex; gap:8px; padding:10px 12px; background:#f5f5f5; overflow-x:auto; }
+        .modal-thumb {
+            width:60px; height:60px; object-fit:cover; border-radius:6px; cursor:pointer;
+            border:2px solid transparent; flex-shrink:0; transition:border-color 0.2s;
+        }
+        .modal-thumb.active { border-color:#000; }
+
+        /* Right: info */
+        .modal-info { flex:1; min-width:0; padding:32px 28px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; max-height:600px; }
+        .modal-title { font-family:'Oswald', sans-serif; font-size:28px; font-weight:700; text-transform:uppercase; letter-spacing:2px; margin:0; }
+        .modal-shipping { font-size:12px; color:#888; }
+        .modal-price { font-size:26px; font-weight:700; display:flex; align-items:center; gap:14px; }
+        .modal-price .old { text-decoration:line-through; color:#aaa; font-size:18px; }
+
+        .size-select { display:flex; flex-direction:column; gap:8px; }
+        .size-select label { font-size:13px; font-weight:600; }
+        .size-select select {
+            padding:10px 14px; border:1px solid #000; border-radius:8px; font-size:14px;
+            font-family:'Unbounded', sans-serif; appearance:auto; cursor:pointer;
+        }
+
+        .modal-description { font-size:13px; line-height:1.7; color:#333; }
+        .modal-description p { margin:0 0 10px; }
+
+        .modal-actions { display:flex; align-items:center; gap:14px; margin-top:8px; }
+        .modal-actions .btn { flex:1; padding:16px; font-size:15px; border-radius:50px; }
+        .modal-wish-btn {
+            width:48px; height:48px; border:1.5px solid #ccc; border-radius:50%; background:#fff;
+            font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+            transition:0.2s;
+        }
+        .modal-wish-btn.liked { color:#ff2d55; border-color:#ff2d55; }
+
+        @media (max-width: 660px) {
+            .modal-body { flex-direction:column; }
+            .modal-info { max-height:none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Навбар -->
+<div class="nav">
+    <div class="logo">LOA</div>
+    <div class="menu">
+        <a href="#catalog">Каталог</a>
+        <a href="#gallery">Галерея</a>
+        <a href="#">О нас</a>
+    </div>
+    <div class="icons">
+        <span onclick="showWishlist()">♡ <span id="wishlist-count">0</span></span>
+        <span onclick="toggleCart()">🛒 <span id="cart-count">0</span></span>
+    </div>
+</div>
+
+<!-- Первая обложка -->
+<div class="cover" style="background-image:url('https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg');">
+    <div class="cover-content">
+        <h1 style="font-size:130px; margin:0;">LOA</h1>
+        <p style="font-size:28px; margin-top:10px;">LOST OF ALL</p>
+    </div>
+</div>
+
+<!-- Вторая обложка -->
+<div id="cover-wings" class="cover" style="background-image:url('https://static.tildacdn.com/tild3730-6434-4134-b064-316263353363/photo.jpg');">
+    <div class="cover-content">
+        <h2 style="font-size:62px;">Loa — ваши Wings</h2>
+        <p style="font-size:22px; max-width:700px; margin:30px auto 0;">
+            LOA — это не просто набор букв, а ключ к состоянию потока...
+        </p>
+    </div>
+</div>
+
+<!-- Каталог -->
+<div id="catalog" class="catalog">
+    <div style="max-width:1200px; margin:0 auto; padding:0 20px;">
+        <h2 style="text-align:center; font-size:48px; margin-bottom:80px; color:#000;">Каталог</h2>
+        <div class="product-grid">
+
+            <!-- Цепь -->
+            <div class="product" onclick="openModal(1)">
+                <div style="position:relative;">
+                    <img src="https://static.tildacdn.com/tild6165-3661-4435-b565-336238373737/photo.jpg" alt="Цепь">
+                    <span class="wishlist-heart" id="heart-1" onclick="event.stopPropagation(); toggleWishlistItem(this, 1, 'Цепь Loa', 1500)">♡</span>
+                </div>
+                <div class="product-info">
+                    <h3>Цепь "Loa"</h3>
+                    <p class="price"><span class="old-price">3000 ₽</span> 1500 ₽</p>
+                    <button class="btn" onclick="event.stopPropagation(); addToCart(1,'Цепь Loa',1500)">В корзину</button>
+                </div>
+            </div>
+
+            <!-- Худи -->
+            <div class="product" onclick="openModal(2)">
+                <div style="position:relative;">
+                    <img src="https://static.tildacdn.com/tild6362-3038-4835-b031-313564643538/photo.jpg" alt="Худи">
+                    <span class="wishlist-heart" id="heart-2" onclick="event.stopPropagation(); toggleWishlistItem(this, 2, 'Худи Loa', 5000)">♡</span>
+                </div>
+                <div class="product-info">
+                    <h3>Худи "Loa"</h3>
+                    <p class="price"><span class="old-price">7000 ₽</span> 5000 ₽</p>
+                    <button class="btn" onclick="event.stopPropagation(); addToCart(2,'Худи Loa',5000)">В корзину</button>
+                </div>
+            </div>
+
+            <!-- Футболка Black -->
+            <div class="product" onclick="openModal(3)">
+                <div style="position:relative;">
+                    <img src="https://static.tildacdn.com/tild3666-3432-4666-b035-373633363835/noroot.png" alt="Футболка Black">
+                    <span class="wishlist-heart" id="heart-3" onclick="event.stopPropagation(); toggleWishlistItem(this, 3, 'Футболка Loa Black', 3500)">♡</span>
+                </div>
+                <div class="product-info">
+                    <h3>Футболка "Loa" BLACK</h3>
+                    <p class="price"><span class="old-price">5000 ₽</span> 3500 ₽</p>
+                    <button class="btn" onclick="event.stopPropagation(); addToCart(3,'Футболка Loa Black',3500)">В корзину</button>
+                </div>
+            </div>
+
+            <!-- Футболка White -->
+            <div class="product" onclick="openModal(4)">
+                <div style="position:relative;">
+                    <img src="https://static.tildacdn.com/tild3433-3837-4332-a638-303037303435/noroot.png" alt="Футболка White">
+                    <span class="wishlist-heart" id="heart-4" onclick="event.stopPropagation(); toggleWishlistItem(this, 4, 'Футболка Loa White', 3500)">♡</span>
+                </div>
+                <div class="product-info">
+                    <h3>Футболка "Loa" WHITE</h3>
+                    <p class="price"><span class="old-price">5000 ₽</span> 3500 ₽</p>
+                    <button class="btn" onclick="event.stopPropagation(); addToCart(4,'Футболка Loa White',3500)">В корзину</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Бегущая строка -->
+<div class="marquee">
+    <div class="marquee-content">Loa • Галерея • Loa • Галерея • Loa • Галерея • Loa • Галерея • Loa • Галерея • </div>
+</div>
+
+<!-- Галерея -->
+<div id="gallery" class="slider">
+    <div class="slides" id="slides">
+        <div class="slide" style="background-image:url('https://static.tildacdn.com/tild6533-6537-4531-a461-333766623465/photo_2026-02-18_11-.jpg');"></div>
+        <div class="slide" style="background-image:url('https://static.tildacdn.com/tild3730-6434-4134-b064-316263353363/photo.jpg');"></div>
+        <div class="slide" style="background-image:url('https://static.tildacdn.com/tild3932-6465-4234-a164-383033353037/photo_2026-02-18_09-.jpg');"></div>
+    </div>
+</div>
+
+<!-- Корзина -->
+<div id="cart-sidebar">
+    <h2>Корзина <span onclick="toggleCart()" style="float:right; cursor:pointer; font-size:34px;">×</span></h2>
+    <div id="cart-items" style="margin:20px 0;"></div>
+    <div id="cart-total" style="font-size:23px; font-weight:700; margin:25px 0;">Итого: 0 ₽</div>
+    <div style="margin-top:30px;">
+        <input type="text" id="name" placeholder="Ваше имя" style="width:100%; padding:12px; margin:8px 0; border:1px solid #000; border-radius:8px; font-family:'Unbounded',sans-serif;">
+        <input type="email" id="email" placeholder="Ваша почта" style="width:100%; padding:12px; margin:8px 0; border:1px solid #000; border-radius:8px; font-family:'Unbounded',sans-serif;">
+        <input type="tel" id="phone" placeholder="Телефон" style="width:100%; padding:12px; margin:8px 0; border:1px solid #000; border-radius:8px; font-family:'Unbounded',sans-serif;">
+        <input type="text" id="telegram" placeholder="Telegram @username" style="width:100%; padding:12px; margin:8px 0; border:1px solid #000; border-radius:8px; font-family:'Unbounded',sans-serif;">
+        <button class="btn" style="width:100%; padding:16px; margin-top:10px;" onclick="submitOrder()">Оформить заказ</button>
+    </div>
+</div>
+
+<!-- ===== PRODUCT MODAL ===== -->
+<div class="product-modal-overlay" id="product-modal-overlay" onclick="handleOverlayClick(event)">
+    <div class="product-modal" id="product-modal">
+        <span class="modal-close" onclick="closeModal()">×</span>
+        <div class="modal-body">
+            <!-- Photos -->
+            <div class="modal-photos">
+                <button class="modal-arrow left" onclick="modalPrevPhoto()">‹</button>
+                <img class="modal-main-photo" id="modal-main-photo" src="" alt="">
+                <button class="modal-arrow right" onclick="modalNextPhoto()">›</button>
+                <div class="modal-thumbs" id="modal-thumbs"></div>
+            </div>
+            <!-- Info -->
+            <div class="modal-info">
+                <h2 class="modal-title" id="modal-title"></h2>
+                <p class="modal-shipping">Срок отправки — до 14 дней с момента оформления.</p>
+                <div class="modal-price" id="modal-price"></div>
+                <div class="size-select" id="modal-size-wrapper" style="display:none;">
+                    <label>Размер</label>
+                    <select id="modal-size">
+                        <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
+                    </select>
+                </div>
+                <div class="modal-description" id="modal-description"></div>
+                <div class="modal-actions">
+                    <button class="btn" id="modal-add-btn" onclick="modalAddToCart()">В корзину</button>
+                    <button class="modal-wish-btn" id="modal-wish-btn" onclick="modalToggleWish()">♡</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== PRODUCTS DATA =====
+const products = {
+    1: {
+        id: 1,
+        name: 'Цепь "Loa"',
+        price: 1500,
+        oldPrice: 3000,
+        hasSize: false,
+        photos: [
+            'https://static.tildacdn.com/tild6165-3661-4435-b565-336238373737/photo.jpg',
+            'https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg',
+        ],
+        description: `
+            <p><strong>Подвеска LOA — Chain</strong></p>
+            <p>Подвеска LOA — это финальный акцент дропа. Минимальный, но считываемый. Не про демонстрацию, а про принадлежность.</p>
+            <p>Буквы LOA выполнены в чёткой форме и зафиксированы на массивной цепи, создавая баланс между чистотой и весом. Подвеска ощущается как объект, а не украшение — она дополняет образ, не перетягивая внимание.</p>
+            <p>Работает как самостоятельный элемент и как продолжение философии дропа: тишина, утрата, контроль.</p>
+            <p>Подвеска производится под заказ. Срок отправки — до 14 дней с момента оформления.</p>
+        `
+    },
+    2: {
+        id: 2,
+        name: 'Худи "Loa"',
+        price: 5000,
+        oldPrice: 7000,
+        hasSize: true,
+        photos: [
+            'https://static.tildacdn.com/tild6362-3038-4835-b031-313564643538/photo.jpg',
+            'https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg',
+            'https://static.tildacdn.com/tild3730-6434-4134-b064-316263353363/photo.jpg',
+        ],
+        description: `
+            <p><strong>Худи LOA — Wings (Black)</strong></p>
+            <p>Худи Wings — центральный объект дропа. Про внутреннюю тяжесть и скрытую силу, про желание уйти и остаться одновременно.</p>
+            <p>Крылья на груди выполнены в мягком, матовом сером оттенке — без резких границ и лишней агрессии. Они не выглядят как декор, а как часть ткани и формы.</p>
+            <p>Плотный футер, свободная посадка и чистый крой делают худи максимально комфортным для повседневной носки, при этом сохраняя характер и глубину.</p>
+            <p>Худи производится под заказ. Срок отправки — до 14 дней после оформления.</p>
+        `
+    },
+    3: {
+        id: 3,
+        name: 'Футболка "Loa" BLACK',
+        price: 3500,
+        oldPrice: 5000,
+        hasSize: true,
+        photos: [
+            'https://static.tildacdn.com/tild3666-3432-4666-b035-373633363835/noroot.png',
+            'https://static.tildacdn.com/tild3932-6465-4234-a164-383033353037/photo_2026-02-18_09-.jpg',
+            'https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg',
+        ],
+        description: `
+            <p><strong>Футболка LOA — Lost of All (Black)</strong></p>
+            <p>Футболка Lost of All — это состояние, а не фраза. Про момент, когда всё лишнее исчезает, и остаёшься только ты и тишина.</p>
+            <p>Минималистичный фронтальный принт выполнен в мягком, почти незаметном тоне — он читается только вблизи. На спине — крылья LOA, как символ утраты и одновременно внутренней свободы. Они не кричат, не доминируют, а существуют на грани видимости — именно так, как задумано.</p>
+            <p>Свободный оверсайз-крой, плотный хлопок и чистые линии делают футболку базой, которая не устареет со временем и не привязана к сезону.</p>
+            <p>Предзаказ: Изделие производится под заказ. Срок отправки — до 14 дней после оформления.</p>
+        `
+    },
+    4: {
+        id: 4,
+        name: 'Футболка "Loa" WHITE',
+        price: 3500,
+        oldPrice: 5000,
+        hasSize: true,
+        photos: [
+            'https://static.tildacdn.com/tild3433-3837-4332-a638-303037303435/noroot.png',
+            'https://static.tildacdn.com/tild3730-6434-4134-b064-316263353363/photo.jpg',
+            'https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg',
+        ],
+        description: `
+            <p><strong>Футболка LOA — Lost of All (White)</strong></p>
+            <p>Футболка Lost of All — это состояние, а не фраза. Про момент, когда всё лишнее исчезает, и остаёшься только ты и тишина.</p>
+            <p>Минималистичный фронтальный принт выполнен в мягком, почти незаметном тоне — он читается только вблизи. На спине — крылья LOA, как символ утраты и одновременно внутренней свободы. Они не кричат, не доминируют, а существуют на грани видимости — именно так, как задумано.</p>
+            <p>Свободный оверсайз-крой, плотный хлопок и чистые линии делают футболку базой, которая не устареет со временем и не привязана к сезону.</p>
+            <p>Предзаказ: Изделие производится под заказ. Срок отправки — до 14 дней после оформления.</p>
+        `
+    }
+};
+
+let currentModalProduct = null;
+let currentPhotoIndex = 0;
+
+function openModal(productId) {
+    const p = products[productId];
+    currentModalProduct = p;
+    currentPhotoIndex = 0;
+
+    document.getElementById('modal-title').textContent = p.name;
+    document.getElementById('modal-price').innerHTML = `<span>${p.price.toLocaleString('ru')} ₽</span><span class="old">${p.oldPrice.toLocaleString('ru')} ₽</span>`;
+    document.getElementById('modal-description').innerHTML = p.description;
+
+    // Size
+    const sizeWrapper = document.getElementById('modal-size-wrapper');
+    sizeWrapper.style.display = p.hasSize ? 'flex' : 'none';
+
+    // Photos
+    renderModalPhotos();
+
+    // Wishlist state
+    const wishBtn = document.getElementById('modal-wish-btn');
+    const heartEl = document.getElementById('heart-' + productId);
+    if (heartEl && heartEl.classList.contains('liked')) {
+        wishBtn.classList.add('liked');
+        wishBtn.textContent = '♥';
+    } else {
+        wishBtn.classList.remove('liked');
+        wishBtn.textContent = '♡';
+    }
+
+    document.getElementById('product-modal-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function renderModalPhotos() {
+    const p = currentModalProduct;
+    const mainImg = document.getElementById('modal-main-photo');
+    mainImg.src = p.photos[currentPhotoIndex];
+
+    const thumbsEl = document.getElementById('modal-thumbs');
+    thumbsEl.innerHTML = p.photos.map((src, i) =>
+        `<img class="modal-thumb ${i === currentPhotoIndex ? 'active' : ''}" src="${src}" onclick="setModalPhoto(${i})">`
+    ).join('');
+}
+
+function setModalPhoto(i) {
+    currentPhotoIndex = i;
+    renderModalPhotos();
+}
+function modalPrevPhoto() {
+    currentPhotoIndex = (currentPhotoIndex - 1 + currentModalProduct.photos.length) % currentModalProduct.photos.length;
+    renderModalPhotos();
+}
+function modalNextPhoto() {
+    currentPhotoIndex = (currentPhotoIndex + 1) % currentModalProduct.photos.length;
+    renderModalPhotos();
+}
+
+function closeModal() {
+    document.getElementById('product-modal-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+function handleOverlayClick(e) {
+    if (e.target === document.getElementById('product-modal-overlay')) closeModal();
+}
+
+function modalAddToCart() {
+    const p = currentModalProduct;
+    const size = p.hasSize ? document.getElementById('modal-size').value : null;
+    const itemName = size ? `${p.name} (${size})` : p.name;
+    addToCart(p.id, itemName, p.price);
+    closeModal();
+    toggleCart();
+}
+
+function modalToggleWish() {
+    const p = currentModalProduct;
+    const wishBtn = document.getElementById('modal-wish-btn');
+    const heartEl = document.getElementById('heart-' + p.id);
+    wishBtn.classList.toggle('liked');
+    if (wishBtn.classList.contains('liked')) {
+        wishBtn.textContent = '♥';
+        if (heartEl) heartEl.classList.add('liked');
+        wishlist.push({id: p.id, name: p.name, price: p.price});
+    } else {
+        wishBtn.textContent = '♡';
+        if (heartEl) heartEl.classList.remove('liked');
+        wishlist = wishlist.filter(item => item.id !== p.id);
+    }
+    document.getElementById('wishlist-count').textContent = wishlist.length;
+}
+
+// ===== SCROLL =====
+window.addEventListener('scroll', () => {
+    const cover = document.getElementById('cover-wings');
+    if (cover.getBoundingClientRect().top < window.innerHeight * 0.75) {
+        cover.classList.add('visible');
+    }
+});
+
+// ===== GALLERY SLIDER =====
+let currentSlide = 0;
+const slidesContainer = document.getElementById('slides');
+setInterval(() => {
+    currentSlide = (currentSlide + 1) % 3;
+    slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+}, 4500);
+
+// ===== CART =====
+let cart = [];
+function addToCart(id, name, price) {
+    cart.push({name, price});
+    document.getElementById('cart-count').textContent = cart.length;
+    updateCart();
+}
+function updateCart() {
+    let html = '', total = 0;
+    cart.forEach((item, i) => {
+        html += `<div style="padding:12px 0; border-bottom:1px solid #eee; font-size:14px;">${item.name} — ${item.price.toLocaleString('ru')} ₽
+                 <span onclick="removeFromCart(${i})" style="color:red; float:right; cursor:pointer; font-size:18px;">×</span></div>`;
+        total += item.price;
+    });
+    document.getElementById('cart-items').innerHTML = html || '<p style="color:#888;">Корзина пуста</p>';
+    document.getElementById('cart-total').textContent = `Итого: ${total.toLocaleString('ru')} ₽`;
+}
+function removeFromCart(i) {
+    cart.splice(i, 1);
+    document.getElementById('cart-count').textContent = cart.length;
+    updateCart();
+}
+function toggleCart() {
+    document.getElementById('cart-sidebar').classList.toggle('open');
+}
+function submitOrder() {
+    if (cart.length === 0) return alert('Корзина пуста');
+
+    const name  = prompt('Ваше имя:');
+    if (!name || !name.trim()) return;
+    const phone = prompt('Ваш номер телефона:');
+    if (!phone || !phone.trim()) return;
+
+    const items = cart.map(i => `${i.name} — ${i.price.toLocaleString('ru')} ₽`).join('\n');
+    const total = cart.reduce((s, i) => s + i.price, 0);
+
+    const formData = new FormData();
+    formData.append('access_key', '2b0958c0-399f-49e6-b189-a87f409a4fd2');
+    formData.append('subject', '🛒 Новый заказ LOA');
+    formData.append('name', name.trim());
+    formData.append('phone', phone.trim());
+    formData.append('message', `Заказ от ${name.trim()}\nТелефон: ${phone.trim()}\n\n${items}\n\nИтого: ${total.toLocaleString('ru')} ₽`);
+
+    fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('Спасибо, ' + name.trim() + '! Заказ оформлен — мы скоро свяжемся с вами.');
+            cart = [];
+            document.getElementById('cart-count').textContent = '0';
+            updateCart();
+            toggleCart();
+        } else {
+            alert('Ошибка отправки заказа. Попробуйте ещё раз.');
+        }
+    })
+    .catch(() => alert('Ошибка отправки заказа. Попробуйте ещё раз.'));
+}
+
+// ===== WISHLIST =====
+let wishlist = [];
+function toggleWishlistItem(el, id, name, price) {
+    if (el.classList.contains('liked')) {
+        el.classList.remove('liked');
+        wishlist = wishlist.filter(item => item.id !== id);
+    } else {
+        el.classList.add('liked');
+        wishlist.push({id, name, price});
+    }
+    document.getElementById('wishlist-count').textContent = wishlist.length;
+}
+function showWishlist() {
+    alert('В избранном: ' + wishlist.length + ' товаров');
+}
+</script>
+</body>
+</html>
