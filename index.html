@@ -280,9 +280,10 @@
 </div>
 
 <script>
-// ЗАМЕНИ ТОЛЬКО ЭТОТ БЛОК:
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 const firebaseConfig = {
-  apiKey: "AIzaSyB0Gb-nMQ3_QhShD0EjDxhmXRv-LSoL9OY", // Здесь теперь заглавная G, как на скриншоте
+  apiKey: "AIzaSyBOgb-nMQ3_QhShDOEjDxhmXRv-LSoL9OY",
   authDomain: "loashop-32ffd.firebaseapp.com",
   projectId: "loashop-32ffd",
   storageBucket: "loashop-32ffd.firebasestorage.app",
@@ -290,6 +291,8 @@ const firebaseConfig = {
   appId: "1:134736189982:web:8584d1bc97fe992154ac0f",
   measurementId: "G-RMDHNKHW56"
 };
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
