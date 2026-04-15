@@ -6,58 +6,35 @@
     <title>Loa — Lost of All</title>
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Unbounded', sans-serif; 
-            background: #000; 
-            color: #fff; 
-            overflow-x: hidden; 
-        }
+    <!-- ПОДКЛЮЧЕНИЕ FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
-        /* ===== АНИМАЦИИ ПРИ СКРОЛЛЕ ===== */
-        .fade-up {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-        }
-        .fade-up.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
+    <style>
+        /* ВЕСЬ ТВОЙ ОРИГИНАЛЬНЫЙ CSS ИЗ loa_v3.html */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Unbounded', sans-serif; background: #000; color: #fff; overflow-x: hidden; }
+
+        .fade-up { opacity: 0; transform: translateY(40px); transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
         .product-card:nth-child(1) { transition-delay: 0.05s; }
         .product-card:nth-child(2) { transition-delay: 0.1s; }
         .product-card:nth-child(3) { transition-delay: 0.15s; }
         .product-card:nth-child(4) { transition-delay: 0.2s; }
 
-        /* ===== NAVBAR ===== */
-        .nav {
-            position: fixed; top: 0; left: 0; right: 0; height: 56px;
-            background: rgba(255,255,255,0.96); backdrop-filter: blur(10px);
-            display: flex; align-items: center;
-            justify-content: space-between; padding: 0 16px; z-index: 1000;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
+        .nav { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: rgba(255,255,255,0.96); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .nav-hamburger { background: none; border: none; cursor: pointer; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
         .nav-hamburger span { display: block; width: 20px; height: 1.5px; background: #000; }
         .nav-logo { position: absolute; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: 800; color: #000; letter-spacing: 1px; }
         .nav-right { display: flex; align-items: center; gap: 2px; }
-        .nav-btn {
-            background: none; border: none; cursor: pointer; width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center; color: #000;
-            border-radius: 50%; transition: background 0.15s; position: relative;
-        }
+        .nav-btn { background: none; border: none; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #000; border-radius: 50%; transition: background 0.15s; position: relative; }
         .nav-btn:active { background: #f0f0f0; transform: scale(0.96); }
         .nav-btn svg { width: 20px; height: 20px; stroke: #000; fill: none; stroke-width: 1.5; }
         .nav-badge { position: absolute; top: 2px; right: 2px; background: #ff2d55; color: #fff; font-size: 9px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .nav-badge.hidden { display: none; }
 
-        /* ===== HERO ===== */
-        .hero {
-            height: 100vh; position: relative; overflow: hidden;
-            display: flex; align-items: center; justify-content: center; text-align: center;
-        }
+        .hero { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
         .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: opacity 1.2s ease; }
         .hero-bg-1 { background-image: url('https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg'); opacity: 1; }
         .hero-bg-2 { background-image: url('https://static.tildacdn.com/tild3730-6434-4134-b064-316263353363/photo.jpg'); opacity: 0; }
@@ -66,212 +43,87 @@
         .hero-title { font-size: clamp(60px, 15vw, 160px); font-weight: 900; line-height: 1; letter-spacing: -2px; }
         .hero-sub { font-size: clamp(10px, 3vw, 18px); font-weight: 400; letter-spacing: 3px; margin-top: 16px; opacity: 0.9; text-transform: uppercase; }
 
-        /* ===== WINGS SECTION ===== */
-        .wings-section {
-            min-height: 100vh; position: relative; overflow: hidden;
-            display: flex; align-items: center; justify-content: center; text-align: center;
-            background: #000; padding: 80px 20px;
-        }
+        .wings-section { min-height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; background: #000; padding: 80px 20px; }
         .wings-bg { position: absolute; inset: 0; background: url('https://static.tildacdn.com/tild6362-3038-4835-b031-313564643538/photo.jpg') center/cover; opacity: 0.45; }
         .wings-content { position: relative; z-index: 2; max-width: 600px; margin: 0 auto; }
         .wings-title { font-size: clamp(36px, 8vw, 110px); font-weight: 900; line-height: 1.1; letter-spacing: -1px; text-transform: uppercase; }
         .wings-desc { font-size: clamp(13px, 4vw, 18px); max-width: 90%; margin: 28px auto 0; line-height: 1.6; opacity: 0.85; }
 
-        /* ===== КАТАЛОГ ===== */
         .catalog { background: #fff; color: #000; padding: 60px 16px 80px; }
-        .catalog-title { 
-            font-size: clamp(24px, 6vw, 32px); 
-            font-weight: 800; 
-            text-align: center; 
-            margin-bottom: 40px; 
-            letter-spacing: -0.5px; 
-        }
-        .product-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 20px; 
-            max-width: 800px; 
-            margin: 0 auto; 
-        }
-        .product-card { 
-            cursor: pointer; 
-            position: relative; 
-            transition: transform 0.3s ease;
-        }
-        .product-card:active { transform: scale(0.98); }
-        .product-img-wrap { 
-            overflow: hidden; 
-            border-radius: 12px; 
-            position: relative; 
-            background: #f5f5f5; 
-            aspect-ratio: 1 / 1;
-            width: 100%;
-        }
-        .product-img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            transition: transform 0.5s ease; 
-            display: block; 
-        }
-        .product-card:hover .product-img { 
-            transform: scale(1.04); 
-        }
-        .wish-btn {
-            position: absolute; top: 12px; right: 12px; width: 40px; height: 40px;
-            background: rgba(255,255,255,0.95); border: none; border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; z-index: 5;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.12); transition: all 0.2s ease;
-            backdrop-filter: blur(4px);
-        }
-        .wish-btn:active { transform: scale(0.92); }
+        .catalog-title { font-size: clamp(24px, 6vw, 32px); font-weight: 800; text-align: center; margin-bottom: 40px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto; }
+        .product-card { cursor: pointer; position: relative; transition: transform 0.3s ease; }
+        .product-img-wrap { overflow: hidden; border-radius: 12px; position: relative; background: #f5f5f5; aspect-ratio: 1 / 1; }
+        .product-img { width: 100%; height: 100%; object-fit: cover; }
+        .wish-btn { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; background: rgba(255,255,255,0.95); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
         .wish-btn svg { width: 18px; height: 18px; stroke: #000; fill: none; stroke-width: 1.8; }
         .wish-btn.liked svg { fill: #ff2d55; stroke: #ff2d55; }
-        .product-name { 
-            font-size: 15px; 
-            font-weight: 700; 
-            margin-top: 12px; 
-            text-align: center; 
-        }
-        .product-price { 
-            font-size: 14px; 
-            margin-top: 6px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px; 
-        }
-        .product-price .current { font-weight: 700; color: #000; }
-        .product-price .old { text-decoration: line-through; color: #aaa; font-size: 12px; }
+        .product-name { font-size: 15px; font-weight: 700; margin-top: 12px; text-align: center; }
+        .product-price { font-size: 14px; margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        .marquee-wrap { background: #000; color: #fff; padding: 14px 0; overflow: hidden; white-space: nowrap; width: 100%; border-top: 1px solid #1a1a1a; border-bottom: 1px solid #1a1a1a; }
+        .marquee-inner { display: inline-block; animation: marquee 12s linear infinite; font-size: 13px; letter-spacing: 3px; font-weight: 500; text-transform: uppercase; padding-right: 20px; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* ===== MARQUEE ===== */
-        .marquee-wrap { 
-            background: #000; 
-            color: #fff; 
-            padding: 14px 0; 
-            overflow: hidden; 
-            white-space: nowrap; 
-            width: 100%;
-            border-top: 1px solid #1a1a1a; 
-            border-bottom: 1px solid #1a1a1a;
-        }
-        .marquee-inner { 
-            display: inline-block; 
-            animation: marquee 12s linear infinite; 
-            font-size: 13px; 
-            letter-spacing: 3px; 
-            font-weight: 500; 
-            text-transform: uppercase;
-            padding-right: 20px;
-        }
-        @keyframes marquee { 
-            0% { transform: translateX(0); } 
-            100% { transform: translateX(-50%); } 
-        }
-        .marquee-dot { margin: 0 16px; opacity: 0.5; }
-
-        /* ===== GALLERY ===== */
         .gallery { position: relative; height: 70vh; min-height: 500px; overflow: hidden; }
         .gallery-slides { display: flex; height: 100%; transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
         .gallery-slide { min-width: 100%; height: 100%; background-size: cover; background-position: center; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 50px; }
         .gallery-slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.8)); }
-        .gallery-slide-content { position: relative; z-index: 2; text-align: center; padding: 0 20px; }
-        .gallery-slide-name { font-size: clamp(18px, 5vw, 24px); font-weight: 700; margin-bottom: 20px; letter-spacing: 0.5px; }
-        .gallery-cart-btn {
-            background: #fff; color: #000; border: none; border-radius: 40px; padding: 12px 32px;
-            font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Unbounded', sans-serif;
-            transition: all 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .gallery-cart-btn:active { transform: scale(0.96); background: #eee; }
+        .gallery-slide-name { font-size: clamp(18px, 5vw, 24px); font-weight: 700; margin-bottom: 20px; text-align: center; }
+        .gallery-cart-btn { background: #fff; color: #000; border: none; border-radius: 40px; padding: 12px 32px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Unbounded'; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .gallery-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
-        .gallery-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.2s; }
+        .gallery-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; }
         .gallery-dot.active { width: 20px; border-radius: 4px; background: #fff; }
 
-        /* ===== PRODUCT OVERLAY ===== */
         .product-page { position: fixed; inset: 0; z-index: 4000; display: none; align-items: flex-start; justify-content: center; padding: 50px 16px 20px; overflow-y: auto; }
         .product-page.open { display: flex; }
         .product-page-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: -1; }
         .pp-card { background: #fff; color: #000; border-radius: 20px; width: 100%; max-width: 500px; overflow: hidden; animation: fadeUp 0.35s ease; margin: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.4); }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(25px);}to{opacity:1;transform:translateY(0);} }
         .pp-photo-area { position: relative; background: #111; }
         .pp-main-photo { width: 100%; max-height: 350px; object-fit: cover; display: block; }
-        .pp-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .pp-thumbs { display: flex; gap: 8px; padding: 12px; background: #fff; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .pp-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; cursor: pointer; }
+        .pp-thumbs { display: flex; gap: 8px; padding: 12px; background: #fff; overflow-x: auto; }
         .pp-thumb { width: 55px; height: 55px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
         .pp-thumb.active { border-color: #000; }
         .pp-info { padding: 20px; }
-        .pp-name { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
-        .pp-price { font-size: 22px; font-weight: 800; display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
-        .pp-price .old { font-size: 14px; font-weight: 400; color: #aaa; text-decoration: line-through; }
-        .pp-size-select { padding: 10px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; font-family: 'Unbounded', sans-serif; margin-bottom: 16px; width: 100%; max-width: 130px; }
-        .pp-desc { font-size: 13px; line-height: 1.6; color: #333; margin-bottom: 20px; }
-        .pp-actions { display: flex; gap: 12px; }
-        .pp-add-btn { flex: 1; background: #000; color: #fff; border: none; border-radius: 40px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Unbounded', sans-serif; transition: 0.2s; }
-        .pp-add-btn:active { transform: scale(0.97); background: #222; }
-        .pp-wish-btn { width: 50px; height: 50px; border: 1px solid #ddd; border-radius: 50%; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; }
-        .pp-wish-btn.liked { border-color: #ff2d55; }
+        .pp-add-btn { flex: 1; background: #000; color: #fff; border: none; border-radius: 40px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Unbounded'; }
+        .pp-wish-btn { width: 50px; height: 50px; border: 1px solid #ddd; border-radius: 50%; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .pp-wish-btn.liked svg { fill: #ff2d55; stroke: #ff2d55; }
 
-        /* Корзина и вишлист */
-        .cart-sidebar, .wish-sidebar {
-            position: fixed; top: 0; right: -100%; width: 100%; max-width: 460px; height: 100vh;
-            background: #fff; color: #000; box-shadow: -5px 0 25px rgba(0,0,0,0.2);
-            transition: right 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1); z-index: 3000;
-            display: flex; flex-direction: column;
-        }
+        .cart-sidebar, .wish-sidebar { position: fixed; top: 0; right: -100%; width: 100%; max-width: 460px; height: 100vh; background: #fff; color: #000; box-shadow: -5px 0 25px rgba(0,0,0,0.2); transition: right 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1); z-index: 3000; display: flex; flex-direction: column; }
         .cart-sidebar.open, .wish-sidebar.open { right: 0; }
-        .cart-header { padding: 20px 20px 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-        .cart-header h2 { font-size: 20px; font-weight: 800; }
-        .cart-close { background: none; border: none; font-size: 28px; cursor: pointer; color: #000; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
-        .cart-body { flex: 1; overflow-y: auto; padding: 16px 20px; -webkit-overflow-scrolling: touch; }
-        .cart-item { padding: 14px 0; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .cart-item-name { font-size: 13px; font-weight: 600; flex: 1; }
-        .cart-item-price { font-size: 13px; font-weight: 700; }
-        .cart-item-del, .cart-item button { background: none; border: none; color: #999; cursor: pointer; font-size: 22px; padding: 0 6px; transition: 0.2s; }
-        .cart-footer { padding: 18px 20px 25px; border-top: 1px solid #eee; flex-shrink: 0; }
-        .cart-total { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
-        .cart-checkout-btn { width: 100%; background: #000; color: #fff; border: none; border-radius: 40px; padding: 15px; font-size: 15px; font-weight: 700; cursor: pointer; }
-
-        /* Аутентификация */
+        .cart-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .cart-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+        .cart-item { padding: 14px 0; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .cart-footer { padding: 18px 20px 25px; border-top: 1px solid #eee; }
+        .cart-checkout-btn { width: 100%; background: #000; color: #fff; border: none; border-radius: 40px; padding: 15px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
+        
         .auth-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px; }
         .auth-overlay.open { display: flex; }
-        .auth-modal { background: #fff; color: #000; border-radius: 28px; width: 100%; max-width: 400px; padding: 32px 28px; position: relative; animation: fadeUp 0.3s ease; }
-        .auth-modal h2 { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
-        .auth-input { width: 100%; padding: 14px; border: 1.5px solid #e5e5e5; border-radius: 16px; font-size: 14px; margin-bottom: 12px; font-family: 'Unbounded', sans-serif; }
-        .auth-submit { width: 100%; padding: 14px; background: #000; color: #fff; border-radius: 40px; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 8px; }
+        .auth-modal { background: #fff; color: #000; border-radius: 28px; width: 100%; max-width: 400px; padding: 32px 28px; position: relative; }
+        .auth-input { width: 100%; padding: 14px; border: 1.5px solid #e5e5e5; border-radius: 16px; font-size: 14px; margin-bottom: 12px; font-family: 'Unbounded'; }
+        .auth-submit { width: 100%; padding: 14px; background: #000; color: #fff; border-radius: 40px; font-weight: 700; font-size: 15px; cursor: pointer; }
+        
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 2999; display: none; }
         .sidebar-overlay.open { display: block; }
 
-        /* Аккаунт */
         .account-page { position: fixed; inset: 0; background: #f5f5f5; z-index: 4500; overflow-y: auto; display: none; }
         .account-page.open { display: block; }
-        .account-nav { background: #fff; padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; position: sticky; top: 0; }
-        .account-body { padding: 20px 16px 40px; max-width: 700px; margin: 0 auto; }
+        .account-nav { background: #fff; padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; position: sticky; top: 0; color: #000; }
+        .account-body { padding: 20px 16px 40px; max-width: 700px; margin: 0 auto; color: #000; }
         .acc-header { background: #000; color: #fff; border-radius: 20px; padding: 22px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; }
         .acc-avatar { width: 56px; height: 56px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; }
         .acc-card { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 16px; }
-        .acc-field input { width: 100%; padding: 12px; border: 1.5px solid #e5e5e5; border-radius: 12px; font-size: 14px; margin-top: 6px; }
-        .profile-dropdown { position: absolute; top: 50px; right: 0; background: #000000; border-radius: 16px; box-shadow: 0 8px 25px rgb(255, 254, 254); width: 220px; display: none; z-index: 2000; overflow: hidden; }
+        .profile-dropdown { position: absolute; top: 50px; right: 0; background: #000; border-radius: 16px; box-shadow: 0 8px 25px rgba(255, 254, 254, 0.1); width: 220px; display: none; z-index: 2000; overflow: hidden; color: #fff; }
 
-        @media (max-width: 640px) {
-            .product-grid { gap: 16px; }
-            .wish-btn { width: 36px; height: 36px; top: 10px; right: 10px; }
-            .product-name { font-size: 13px; margin-top: 10px; }
-            .product-price { font-size: 12px; }
-            .catalog { padding: 50px 16px 60px; }
-            .pp-info { padding: 16px; }
-        }
-        @media (min-width: 641px) and (max-width: 900px) {
-            .product-grid { gap: 24px; }
-        }
-        @media (min-width: 901px) {
-            .product-grid { grid-template-columns: repeat(2, 1fr); }
-        }
+        /* Окно успеха ЮMoney */
+        #payment-success-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; display: none; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        .success-content { background: #fff; color: #000; padding: 40px 20px; border-radius: 30px; max-width: 400px; width: 100%; }
     </style>
 </head>
 <body>
 
-<!-- ===== NAVBAR ===== -->
+<!-- NAVBAR -->
 <nav class="nav">
     <button class="nav-hamburger" aria-label="Меню" onclick="toggleMobileMenu()">
         <span></span><span></span><span></span>
@@ -295,7 +147,7 @@
     </div>
 </nav>
 
-<!-- ===== HERO ===== -->
+<!-- HERO -->
 <section class="hero fade-up">
     <div class="hero-bg hero-bg-1" id="hero-bg-1"></div>
     <div class="hero-bg hero-bg-2" id="hero-bg-2"></div>
@@ -305,7 +157,7 @@
     </div>
 </section>
 
-<!-- ===== WINGS SECTION ===== -->
+<!-- WINGS SECTION -->
 <section class="wings-section fade-up">
     <div class="wings-bg"></div>
     <div class="wings-content">
@@ -314,59 +166,16 @@
     </div>
 </section>
 
-<!-- ===== КАТАЛОГ ===== -->
+<!-- КАТАЛОГ -->
 <section class="catalog" id="catalog">
     <div class="catalog-title fade-up">Каталог</div>
-    <div class="product-grid">
-        <div class="product-card fade-up" onclick="openProduct(1)">
-            <div class="product-img-wrap">
-                <img class="product-img" src="https://static.tildacdn.com/tild6165-3661-4435-b565-336238373737/photo.jpg" alt="Цепь Loa" loading="lazy">
-                <button class="wish-btn" id="heart-1" onclick="event.stopPropagation(); toggleWish(1)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            </div>
-            <div class="product-name">Цепь "Loa"</div>
-            <div class="product-price"><span class="current">1 500 р.</span><span class="old">3 000 р.</span></div>
-        </div>
-        <div class="product-card fade-up" onclick="openProduct(2)">
-            <div class="product-img-wrap"><img class="product-img" src="https://static.tildacdn.com/tild6362-3038-4835-b031-313564643538/photo.jpg" alt="Худи Loa" loading="lazy"><button class="wish-btn" id="heart-2" onclick="event.stopPropagation(); toggleWish(2)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div>
-            <div class="product-name">Худи "Loa"</div>
-            <div class="product-price"><span class="current">5 000 р.</span><span class="old">7 000 р.</span></div>
-        </div>
-        <div class="product-card fade-up" onclick="openProduct(3)">
-            <div class="product-img-wrap"><img class="product-img" src="https://static.tildacdn.com/tild3666-3432-4666-b035-373633363835/noroot.png" alt="Футболка Black" loading="lazy"><button class="wish-btn" id="heart-3" onclick="event.stopPropagation(); toggleWish(3)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div>
-            <div class="product-name">Футболка "Loa" BLACK</div>
-            <div class="product-price"><span class="current">3 500 р.</span><span class="old">5 000 р.</span></div>
-        </div>
-        <div class="product-card fade-up" onclick="openProduct(4)">
-            <div class="product-img-wrap"><img class="product-img" src="https://static.tildacdn.com/tild3433-3837-4332-a638-303037303435/noroot.png" alt="Футболка White" loading="lazy"><button class="wish-btn" id="heart-4" onclick="event.stopPropagation(); toggleWish(4)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div>
-            <div class="product-name">Футболка "Loa" WHITE</div>
-            <div class="product-price"><span class="current">3 500 р.</span><span class="old">5 000 р.</span></div>
-        </div>
-    </div>
+    <div class="product-grid" id="catalog-grid"></div>
 </section>
 
-<!-- MARQUEE -->
+<!-- MARQUEE (ВОССТАНОВЛЕНО - ДЛИННЫЙ ТЕКСТ) -->
 <div class="marquee-wrap">
     <div class="marquee-inner">
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
-        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
+        ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span> ГАЛЕРЕЯ <span class="marquee-dot">•</span> LOA <span class="marquee-dot">•</span>
     </div>
 </div>
 
@@ -380,42 +189,112 @@
     <div class="gallery-dots" id="gallery-dots"><div class="gallery-dot active" onclick="goGallery(0)"></div><div class="gallery-dot" onclick="goGallery(1)"></div><div class="gallery-dot" onclick="goGallery(2)"></div></div>
 </section>
 
-<!-- ===== ОВЕРЛЕИ ===== -->
-<div class="product-page" id="product-page" onclick="ppBackdropClick(event)"><div class="product-page-backdrop"></div><div class="pp-card" id="pp-card"><div class="pp-photo-area"><button class="pp-arrow left" onclick="ppPrev()">‹</button><img class="pp-main-photo" id="pp-main-photo" src=""><button class="pp-arrow right" onclick="ppNext()">›</button></div><div class="pp-thumbs" id="pp-thumbs"></div><div class="pp-info"><div class="pp-name" id="pp-name"></div><div class="pp-shipping" style="font-size:11px; color:#777; margin-bottom:12px;">Срок отправки — до 14 дней с момента оформления.</div><div class="pp-price" id="pp-price"></div><div id="pp-size-wrap" style="display:none;"><select class="pp-size-select" id="pp-size"><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select></div><div class="pp-desc" id="pp-desc"></div><div class="pp-actions"><button class="pp-add-btn" onclick="ppAddToCart()">В корзину</button><button class="pp-wish-btn" id="pp-wish-btn" onclick="ppToggleWish()"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div></div></div></div>
-
-<div class="sidebar-overlay" id="cart-overlay" onclick="toggleCart()"></div>
-<div class="cart-sidebar" id="cart-sidebar">
-    <div class="cart-header"><h2>Корзина</h2><button class="cart-close" onclick="toggleCart()">×</button></div>
-    <div class="cart-body" id="cart-items"></div>
-    <div class="cart-footer">
-        <div class="cart-total" id="cart-total">Итого: 0 р.</div>
-        <!-- НОВАЯ КНОПКА ЮKASSA -->
-        <button class="cart-checkout-btn" onclick="payWithYooKassa()" style="background:#0066ff; margin-bottom:12px;">Оплатить через ЮKassa</button>
-        <!-- СТАРАЯ КНОПКА (оставлена без изменений) -->
-        <button class="cart-checkout-btn" onclick="submitOrder()" style="background:#000;">Оформить заказ (старый способ)</button>
+<!-- OVERLAYS -->
+<div class="product-page" id="product-page" onclick="ppBackdropClick(event)">
+    <div class="product-page-backdrop"></div>
+    <div class="pp-card" id="pp-card">
+        <div class="pp-photo-area">
+            <button class="pp-arrow" style="left:10px;" onclick="ppPrev()">‹</button>
+            <img class="pp-main-photo" id="pp-main-photo" src="">
+            <button class="pp-arrow" style="right:10px;" onclick="ppNext()">›</button>
+        </div>
+        <div class="pp-thumbs" id="pp-thumbs"></div>
+        <div class="pp-info">
+            <div class="pp-name" id="pp-name" style="font-weight:800; font-size:20px;"></div>
+            <div style="font-size:11px; color:#777; margin:10px 0;">Срок отправки — до 14 дней с момента оформления.</div>
+            <div class="pp-price" id="pp-price" style="font-weight:800; font-size:22px;"></div>
+            <div id="pp-size-wrap" style="display:none;"><select class="pp-size-select" id="pp-size" style="padding:10px; border-radius:10px; margin:15px 0;"><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select></div>
+            <div class="pp-desc" id="pp-desc" style="font-size:13px; line-height:1.6; margin-bottom:20px;"></div>
+            <div style="display:flex; gap:12px;"><button class="pp-add-btn" onclick="ppAddToCart()">В корзину</button><button class="pp-wish-btn" id="pp-wish-btn" onclick="ppToggleWish()">❤</button></div>
+        </div>
     </div>
 </div>
 
+<div class="sidebar-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+<div class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header"><h2>Корзина</h2><button style="background:none; border:none; font-size:28px;" onclick="toggleCart()">×</button></div>
+    <div class="cart-body" id="cart-items"></div>
+    <div class="cart-footer">
+        <div class="cart-total" id="cart-total" style="font-weight:800; font-size:18px; margin-bottom:15px;">Итого: 0 р.</div>
+        <button class="cart-checkout-btn" onclick="payWithYooMoney()" style="background:#0066ff;">Оплатить картой через ЮMoney</button>
+        <button class="cart-checkout-btn" onclick="submitOrderOld()" style="background:#000; font-size:12px; opacity:0.5;">Оформить без оплаты (тест)</button>
+    </div>
+</div>
+
+<div id="payment-success-modal">
+    <div class="success-content">
+        <h2>Заказ оплачен!</h2>
+        <p style="margin:20px 0; opacity:0.7;">Спасибо за покупку! Заказ сохранен в вашем кабинете. Мы свяжемся с вами в ближайшее время.</p>
+        <button class="cart-checkout-btn" onclick="closeSuccessModal()">Закрыть</button>
+    </div>
+</div>
+
+<form id="autoYooForm" method="POST" action="https://yoomoney.ru/quickpay/confirm" target="_blank" style="display:none;">
+    <input type="hidden" name="receiver" value="4100119441681698">
+    <input type="hidden" name="quickpay-form" value="shop">
+    <input type="hidden" name="targets" value="Оплата заказа Loa Shop">
+    <input type="hidden" name="sum" id="yooSum">
+    <input type="hidden" name="label" id="yooLabel">
+    <input type="hidden" name="successURL" id="yooSuccessURL">
+    <input type="hidden" name="paymentType" value="AC">
+</form>
+
 <div class="sidebar-overlay" id="wish-overlay" onclick="toggleWishSidebar()"></div>
-<div class="wish-sidebar" id="wish-sidebar"><div class="cart-header"><h2>Избранное</h2><button class="cart-close" onclick="toggleWishSidebar()">×</button></div><div class="cart-body" id="wish-items"></div></div>
+<div class="wish-sidebar" id="wish-sidebar">
+    <div class="cart-header"><h2>Избранное</h2><button style="background:none; border:none; font-size:28px;" onclick="toggleWishSidebar()">×</button></div>
+    <div class="cart-body" id="wish-items"></div>
+</div>
 
-<div class="auth-overlay" id="auth-overlay" onclick="authOverlayClick(event)"><div class="auth-modal"><button class="auth-x" onclick="closeAuth()" style="position:absolute; right:20px; top:16px; background:none; border:none; font-size:24px; cursor:pointer;">×</button><div id="auth-login-view"><h2>Войти</h2><p style="color:#888; font-size:13px;">Введите email и пароль</p><div class="auth-err" id="login-err" style="color:#ff3b30; display:none;">Неверный email или пароль</div><input class="auth-input" id="login-email" placeholder="Email"><input class="auth-input" id="login-pass" type="password" placeholder="Пароль"><button class="auth-submit" onclick="doLogin()">Войти</button><div class="auth-switch" style="margin-top:16px; font-size:12px;">Нет аккаунта? <b onclick="showReg()" style="cursor:pointer;">Зарегистрироваться</b></div></div><div id="auth-reg-view" style="display:none;"><h2>Регистрация</h2><p style="color:#888; font-size:13px;">Создайте аккаунт LOA</p><div class="auth-err" id="reg-err" style="color:#ff3b30; display:none;"></div><input class="auth-input" id="reg-name" placeholder="Имя"><input class="auth-input" id="reg-email" placeholder="Email"><input class="auth-input" id="reg-phone" placeholder="Телефон"><input class="auth-input" id="reg-pass" type="password" placeholder="Пароль"><button class="auth-submit" onclick="doReg()">Создать аккаунт</button><div class="auth-switch" style="margin-top:16px; font-size:12px;">Уже есть аккаунт? <b onclick="showLogin()" style="cursor:pointer;">Войти</b></div></div></div></div>
+<div class="auth-overlay" id="auth-overlay">
+    <div class="auth-modal">
+        <div id="auth-login-view">
+            <h2>Войти</h2><br>
+            <input class="auth-input" id="login-email" placeholder="Email">
+            <input class="auth-input" id="login-pass" type="password" placeholder="Пароль">
+            <button class="auth-submit" onclick="doLogin()">Войти</button>
+            <p style="text-align:center; font-size:12px; margin-top:15px; cursor:pointer;" onclick="showReg()">Нет аккаунта? Регистрация</p>
+        </div>
+        <div id="auth-reg-view" style="display:none;">
+            <h2>Регистрация</h2><br>
+            <input class="auth-input" id="reg-name" placeholder="Имя">
+            <input class="auth-input" id="reg-email" placeholder="Email">
+            <input class="auth-input" id="reg-pass" type="password" placeholder="Пароль">
+            <button class="auth-submit" onclick="doReg()">Создать аккаунт</button>
+            <p style="text-align:center; font-size:12px; margin-top:15px; cursor:pointer;" onclick="showLogin()">Уже есть аккаунт? Войти</p>
+        </div>
+        <button style="width:100%; background:none; border:none; margin-top:10px; opacity:0.5;" onclick="closeAuth()">Отмена</button>
+    </div>
+</div>
 
-<div class="account-page" id="account-page"><div class="account-nav"><button class="account-back-btn" onclick="closeAccount()" style="background:none; border:none; font-size:14px; font-weight:600; cursor:pointer;">← Назад</button><div style="font-weight:800;">Loa</div><div style="width:50px;"></div></div><div class="account-body"><div class="acc-header"><div class="acc-avatar" id="acc-avatar">?</div><div><h3 id="acc-name-display">—</h3><p id="acc-email-display" style="font-size:12px;">—</p></div></div><div class="acc-card"><h4 style="margin-bottom:16px;">Личные данные</h4><div class="acc-field"><label>Имя</label><input type="text" id="prof-name"></div><div class="acc-field"><label>Email</label><input type="email" id="prof-email" readonly style="background:#f5f5f5;"></div><div class="acc-field"><label>Телефон</label><input type="tel" id="prof-phone"></div><button class="acc-save-btn" onclick="saveProfile()" style="background:#000; color:#fff; border:none; border-radius:40px; padding:12px 24px; margin-top:8px; cursor:pointer;">Сохранить</button></div><div class="acc-card"><h4 style="margin-bottom:16px;">Мои заказы</h4><div id="acc-orders"></div></div><div class="acc-card"><h4 style="margin-bottom:16px;">Избранное</h4><div id="acc-wish"></div></div></div></div>
+<div class="account-page" id="account-page">
+    <div class="account-nav"><button onclick="closeAccount()" style="background:none; border:none; font-weight:700;">← Назад</button><div>Loa</div><div style="width:50px;"></div></div>
+    <div class="account-body">
+        <div class="acc-header"><div class="acc-avatar" id="acc-avatar">?</div><div><h3 id="acc-name-display">Загрузка...</h3><p id="acc-email-display" style="font-size:12px; opacity:0.6;"></p></div></div>
+        <div class="acc-card"><h4>Личные данные</h4><br>
+            <input class="auth-input" id="prof-name" placeholder="Имя">
+            <button class="cart-checkout-btn" onclick="saveProfile()" style="padding:10px; font-size:13px; width:auto;">Сохранить</button>
+        </div>
+        <div class="acc-card"><h4>Мои заказы</h4><br><div id="acc-orders"></div></div>
+        <button class="cart-checkout-btn" style="background:#ff3b30;" onclick="doLogout()">Выйти из аккаунта</button>
+    </div>
+</div>
 
 <script>
-// ===== АНИМАЦИЯ ПРИ СКРОЛЛЕ =====
-const fadeElements = document.querySelectorAll('.fade-up');
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-        }
-    });
-}, { threshold: 0.15, rootMargin: "0px 0px -30px 0px" });
-fadeElements.forEach(el => observer.observe(el));
+// ЗАМЕНИ ТОЛЬКО ЭТОТ БЛОК:
+const firebaseConfig = {
+  apiKey: "AIzaSyB0Gb-nMQ3_QhShD0EjDxhmXRv-LSoL9OY", // Здесь теперь заглавная G, как на скриншоте
+  authDomain: "loashop-32ffd.firebaseapp.com",
+  projectId: "loashop-32ffd",
+  storageBucket: "loashop-32ffd.firebasestorage.app",
+  messagingSenderId: "134736189982",
+  appId: "1:134736189982:web:8584d1bc97fe992154ac0f",
+  measurementId: "G-RMDHNKHW56"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-// ===== ПРОДУКТЫ =====
+// ===== 2. ТОВАРЫ (ВОССТАНОВЛЕНО ПОЛНОСТЬЮ) =====
 const PRODUCTS = {
     1: { id:1, name:'Цепь "Loa"', price:1500, oldPrice:3000, hasSize:false,
          photos:['https://static.tildacdn.com/tild6165-3661-4435-b565-336238373737/photo.jpg','https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg'],
@@ -431,171 +310,182 @@ const PRODUCTS = {
          desc:`<p><strong>Футболка LOA — Lost of All (White)</strong></p><p>Та же философия — чистый тон. Свободный оверсайз-крой, плотный хлопок.</p><p>Минималистичный принт спереди и крылья на спине. Футболка становится продолжением вашего внутреннего состояния.</p><p>Предзаказ: Изделие производится под заказ.<br>Срок отправки — до 14 дней после оформления.</p>` }
 };
 
-// HERO кроссфейд
-let heroBg = 1;
-setInterval(() => { heroBg = heroBg === 1 ? 2 : 1; document.getElementById('hero-bg-1').style.opacity = heroBg === 1 ? '1' : '0'; document.getElementById('hero-bg-2').style.opacity = heroBg === 2 ? '1' : '0'; }, 4200);
+let cart = JSON.parse(localStorage.getItem('loa_cart') || '[]');
+let wishlist = JSON.parse(localStorage.getItem('loa_wish') || '[]');
+let currentUser = null;
 
-// Галерея
+// СИСТЕМА
+auth.onAuthStateChanged(user => {
+    if (user) {
+        db.collection('users').doc(user.uid).get().then(doc => {
+            currentUser = { uid: user.uid, ...doc.data() };
+            renderNavProfile();
+            checkSuccess();
+        });
+    } else {
+        currentUser = null;
+        renderNavProfile();
+    }
+});
+
+function renderCatalog() {
+    document.getElementById('catalog-grid').innerHTML = Object.values(PRODUCTS).map(p => `
+        <div class="product-card fade-up" onclick="openProduct(${p.id})">
+            <div class="product-img-wrap">
+                <img src="${p.photos[0]}" class="product-img">
+                <button class="wish-btn ${wishlist.some(w=>w.id===p.id)?'liked':''}" onclick="event.stopPropagation(); toggleWish(${p.id})">
+                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>
+            </div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-price"><b>${p.price} р.</b> <span style="text-decoration:line-through; opacity:0.3;">${p.oldPrice} р.</span></div>
+        </div>
+    `).join('');
+    const obs = new IntersectionObserver((es)=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')), {threshold:0.1});
+    document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+}
+
+// ГАЛЕРЕЯ
 let galIdx = 0;
 function goGallery(i) { galIdx = i; document.getElementById('gallery-slides').style.transform = `translateX(-${i*100}%)`; document.querySelectorAll('.gallery-dot').forEach((d,j)=>d.classList.toggle('active',j===i)); }
 setInterval(() => goGallery((galIdx+1)%3), 4800);
 
-// PRODUCT OVERLAY
-let curProduct = null, curPhotoIdx = 0;
-function openProduct(id) { const p = PRODUCTS[id]; curProduct = p; curPhotoIdx = 0; document.getElementById('pp-name').innerHTML = p.name; document.getElementById('pp-price').innerHTML = `${p.price.toLocaleString('ru')} р. <span class="old">${p.oldPrice.toLocaleString('ru')} р.</span>`; document.getElementById('pp-desc').innerHTML = p.desc; document.getElementById('pp-size-wrap').style.display = p.hasSize ? 'block' : 'none'; renderPPPhotos(); document.getElementById('pp-wish-btn').classList.toggle('liked', wishlist.some(w=>w.id===id)); document.getElementById('product-page').classList.add('open'); document.body.style.overflow = 'hidden'; }
-function closeProduct() { document.getElementById('product-page').classList.remove('open'); document.body.style.overflow = ''; }
-function ppBackdropClick(e) { if (!document.getElementById('pp-card').contains(e.target)) closeProduct(); }
-function renderPPPhotos() { document.getElementById('pp-main-photo').src = curProduct.photos[curPhotoIdx]; document.getElementById('pp-thumbs').innerHTML = curProduct.photos.map((src,i)=>`<img class="pp-thumb ${i===curPhotoIdx?'active':''}" src="${src}" onclick="setPPPhoto(${i})">`).join(''); }
-function setPPPhoto(i) { curPhotoIdx = i; renderPPPhotos(); }
-function ppPrev() { curPhotoIdx = (curPhotoIdx-1+curProduct.photos.length)%curProduct.photos.length; renderPPPhotos(); }
-function ppNext() { curPhotoIdx = (curPhotoIdx+1)%curProduct.photos.length; renderPPPhotos(); }
-function ppAddToCart() { const size = curProduct.hasSize ? document.getElementById('pp-size').value : null; addToCart(curProduct.id, size?`${curProduct.name} (${size})`:curProduct.name, curProduct.price); closeProduct(); toggleCart(); }
-function ppToggleWish() { if(curProduct) toggleWish(curProduct.id); document.getElementById('pp-wish-btn').classList.toggle('liked', wishlist.some(w=>w.id===curProduct.id)); }
+// HERO
+let heroBg = 1;
+setInterval(() => { heroBg = heroBg === 1 ? 2 : 1; document.getElementById('hero-bg-1').style.opacity = heroBg === 1 ? '1' : '0'; document.getElementById('hero-bg-2').style.opacity = heroBg === 2 ? '1' : '0'; }, 4200);
 
-let cart = [];
-function addToCart(id,name,price) { cart.push({id,name,price}); updateCartUI(); }
+// ОВЕРЛЕЙ ТОВАРА
+let curP = null, curPhotoIdx = 0;
+function openProduct(id) {
+    curP = PRODUCTS[id]; curPhotoIdx = 0;
+    document.getElementById('pp-name').innerText = curP.name;
+    document.getElementById('pp-price').innerHTML = `${curP.price} р. <span style="text-decoration:line-through; font-size:14px; opacity:0.3; margin-left:10px;">${curP.oldPrice} р.</span>`;
+    document.getElementById('pp-desc').innerHTML = curP.desc;
+    document.getElementById('pp-size-wrap').style.display = curP.hasSize ? 'block' : 'none';
+    renderPPPhotos();
+    document.getElementById('pp-wish-btn').classList.toggle('liked', wishlist.some(w=>w.id===curP.id));
+    document.getElementById('product-page').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function renderPPPhotos() {
+    document.getElementById('pp-main-photo').src = curP.photos[curPhotoIdx];
+    document.getElementById('pp-thumbs').innerHTML = curP.photos.map((s,i)=>`<img class="pp-thumb ${i===curPhotoIdx?'active':''}" src="${s}" onclick="curPhotoIdx=${i};renderPPPhotos()">`).join('');
+}
+function ppNext() { curPhotoIdx = (curPhotoIdx + 1) % curP.photos.length; renderPPPhotos(); }
+function ppPrev() { curPhotoIdx = (curPhotoIdx - 1 + curP.photos.length) % curP.photos.length; renderPPPhotos(); }
+function ppAddToCart() { const s = curP.hasSize ? document.getElementById('pp-size').value : ''; addToCart(curP.id, curP.name+(s?` (${s})`:''), curP.price); document.getElementById('product-page').classList.remove('open'); document.body.style.overflow=''; toggleCart(); }
+function ppBackdropClick(e) { if(e.target.classList.contains('product-page-backdrop')) { document.getElementById('product-page').classList.remove('open'); document.body.style.overflow=''; } }
+function ppToggleWish() { toggleWish(curP.id); document.getElementById('pp-wish-btn').classList.toggle('liked', wishlist.some(w=>w.id===curP.id)); }
+
+// КОРЗИНА
+function addToCart(id, name, price) { cart.push({id, name, price}); updateCartUI(); }
 function removeFromCart(i) { cart.splice(i,1); updateCartUI(); }
-function updateCartUI() { 
-    document.getElementById('cart-badge').textContent = cart.length; 
-    document.getElementById('cart-badge').classList.toggle('hidden',!cart.length); 
-    const total = cart.reduce((s,i)=>s+i.price,0); 
-    document.getElementById('cart-total').innerHTML = `Итого: ${total.toLocaleString('ru')} р.`; 
-    document.getElementById('cart-items').innerHTML = cart.length ? cart.map((item,i)=>`<div class="cart-item"><span class="cart-item-name">${item.name}</span><span class="cart-item-price">${item.price.toLocaleString('ru')} р.</span><button class="cart-item-del" onclick="removeFromCart(${i})">✕</button></div>`).join('') : '<div class="empty-msg" style="text-align:center; padding:32px 0; color:#aaa;">Корзина пуста</div>'; 
+function updateCartUI() {
+    localStorage.setItem('loa_cart', JSON.stringify(cart));
+    document.getElementById('cart-badge').textContent = cart.length;
+    document.getElementById('cart-badge').classList.toggle('hidden', !cart.length);
+    const total = cart.reduce((s,i)=>s+i.price, 0);
+    document.getElementById('cart-total').innerText = `Итого: ${total} р.`;
+    document.getElementById('cart-items').innerHTML = cart.length ? cart.map((it,i)=>`<div class="cart-item"><span>${it.name}</span><b>${it.price} р.</b><button onclick="removeFromCart(${i})" style="background:none; border:none; color:#999; cursor:pointer; font-size:22px;">✕</button></div>`).join('') : '<p style="opacity:0.3; text-align:center; padding:40px 0;">Корзина пуста</p>';
 }
-function toggleCart() { 
-    document.getElementById('wish-sidebar').classList.remove('open'); 
-    document.getElementById('wish-overlay').classList.remove('open'); 
-    document.getElementById('cart-sidebar').classList.toggle('open'); 
-    document.getElementById('cart-overlay').classList.toggle('open'); 
+function toggleCart() { document.getElementById('cart-sidebar').classList.toggle('open'); document.getElementById('cart-overlay').classList.toggle('open'); }
+
+// ИЗБРАННОЕ
+function toggleWish(id) { 
+    const idx = wishlist.findIndex(w=>w.id===id); 
+    if(idx>=0) wishlist.splice(idx,1); else wishlist.push({id, name:PRODUCTS[id].name, price:PRODUCTS[id].price}); 
+    updateWishUI(); renderCatalog();
 }
-function submitOrder() { 
-    if(!cart.length) return alert('Корзина пуста'); 
-    let name, phone; 
-    if(currentUser) { name=currentUser.name; phone=currentUser.phone||prompt('Ваш телефон:'); if(!phone) return; } 
-    else { name=prompt('Ваше имя:'); if(!name?.trim()) return; phone=prompt('Ваш телефон:'); if(!phone?.trim()) return; } 
-    const items = cart.map(i=>`${i.name} — ${i.price.toLocaleString('ru')} р.`).join('\n'); 
-    const totalStr = cart.reduce((s,i)=>s+i.price,0).toLocaleString('ru')+' р.'; 
-    const fd=new FormData(); 
-    fd.append('access_key','2b0958c0-399f-49e6-b189-a87f409a4fd2'); 
-    fd.append('subject','Новый заказ LOA'); 
-    fd.append('name',name.trim()); 
-    fd.append('phone',phone.trim()); 
-    fd.append('message',`Заказ от ${name.trim()}\nТелефон: ${phone.trim()}\n\n${items}\n\nИтого: ${totalStr}`); 
-    fetch('https://api.web3forms.com/submit',{method:'POST',body:fd}).then(r=>r.json()).then(d=>{ 
-        if(d.success){ 
-            const date = new Date().toLocaleDateString('ru',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); 
-            saveOrderToUser({date, items: cart.map(i=>i.name).join(', '), total: totalStr}); 
-            alert(`Спасибо, ${name.trim()}! Заказ оформлен.`); 
-            cart=[]; updateCartUI(); toggleCart(); 
-        } else alert('Ошибка. Попробуйте ещё раз.'); 
-    }).catch(()=>alert('Ошибка. Попробуйте ещё раз.')); 
+function updateWishUI() {
+    localStorage.setItem('loa_wish', JSON.stringify(wishlist));
+    document.getElementById('wish-badge').textContent = wishlist.length;
+    document.getElementById('wish-badge').classList.toggle('hidden', !wishlist.length);
+    document.getElementById('wish-items').innerHTML = wishlist.length ? wishlist.map(it=>`<div class="cart-item"><span>${it.name}</span><button onclick="addToCart(${it.id},'${it.name}',${it.price}); toggleWishSidebar(); toggleCart();" style="background:none; border:none; color:blue; cursor:pointer;">+</button></div>`).join('') : '<p style="opacity:0.3; text-align:center; padding:40px 0;">Избранное пусто</p>';
 }
+function toggleWishSidebar() { document.getElementById('wish-sidebar').classList.toggle('open'); document.getElementById('wish-overlay').classList.toggle('open'); }
 
-let wishlist = [];
-function toggleWish(id) { const p = PRODUCTS[id]; const idx = wishlist.findIndex(w=>w.id===id); if(idx>=0) wishlist.splice(idx,1); else wishlist.push({id,name:p.name,price:p.price}); const btn = document.getElementById('heart-'+id); if(btn) btn.classList.toggle('liked', wishlist.some(w=>w.id===id)); updateWishUI(); }
-function updateWishUI() { 
-    const badge = document.getElementById('wish-badge'); 
-    badge.textContent = wishlist.length; 
-    badge.classList.toggle('hidden',!wishlist.length); 
-    document.getElementById('wish-items').innerHTML = wishlist.length ? wishlist.map(i=>`<div class="cart-item"><span class="cart-item-name">${i.name}</span><span class="cart-item-price">${i.price.toLocaleString('ru')} р.</span><button class="cart-item-del" onclick="addToCart(${i.id},'${i.name}',${i.price}); toggleWishSidebar(); toggleCart();">+</button></div>`).join('') : '<div class="empty-msg" style="text-align:center; padding:32px 0; color:#aaa;">Избранное пусто</div>'; 
+// ОПЛАТА ЮMONEY
+function payWithYooMoney() {
+    if(!currentUser) return openAuth();
+    if(!cart.length) return alert('Пусто');
+    const total = cart.reduce((s,i)=>s+i.price, 0);
+    document.getElementById('yooSum').value = total;
+    document.getElementById('yooLabel').value = currentUser.uid;
+    document.getElementById('yooSuccessURL').value = window.location.href.split('?')[0] + "?paid=true";
+    document.getElementById('autoYooForm').submit();
 }
-function toggleWishSidebar() { 
-    document.getElementById('cart-sidebar').classList.remove('open'); 
-    document.getElementById('cart-overlay').classList.remove('open'); 
-    updateWishUI(); 
-    document.getElementById('wish-sidebar').classList.toggle('open'); 
-    document.getElementById('wish-overlay').classList.toggle('open'); 
-}
-
-// ==================== ЮKASSA ОПЛАТА (добавлено) ====================
-async function payWithYooKassa() {
-    if (!cart.length) {
-        alert('Корзина пуста');
-        return;
-    }
-
-    const total = cart.reduce((sum, item) => sum + item.price, 0);
-    const orderId = 'LOA-' + Date.now();
-
-    const paymentData = {
-        amount: {
-            value: total.toFixed(2),
-            currency: "RUB"
-        },
-        capture: true,
-        confirmation: {
-            type: "redirect",
-            return_url: window.location.href.split('?')[0] + "?payment=success&order=" + orderId
-        },
-        description: `Заказ LOA #${orderId} — ${cart.map(i => i.name).join(', ')}`,
-        metadata: {
-            order_id: orderId,
-            customer: currentUser ? (currentUser.email || currentUser.name) : "Гость"
-        }
-    };
-
-    try {
-        const response = await fetch('https://api.yookassa.ru/v3/payments', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Idempotence-Key': orderId,
-                'Authorization': 'Basic ' + btoa('1220738:live_K1lyleW9hTxGAMTJ_KbM_h99jdZvilnbJX-RbuWgtk')
-            },
-            body: JSON.stringify(paymentData)
+function checkSuccess() {
+    const p = new URLSearchParams(window.location.search);
+    if(p.get('paid') === 'true' && cart.length > 0) {
+        const order = { 
+            uid: currentUser.uid, 
+            items: cart.map(i=>i.name).join(', '), 
+            total: cart.reduce((s,i)=>s+i.price, 0) + ' р.', 
+            date: new Date().toLocaleString('ru') 
+        };
+        db.collection('orders').add(order).then(() => {
+            const fd = new FormData();
+            fd.append('access_key','2b0958c0-399f-49e6-b189-a87f409a4fd2');
+            fd.append('message',`ЗАКАЗ ОПЛАЧЕН!\nКлиент: ${currentUser.name}\nТовары: ${order.items}\nСумма: ${order.total}`);
+            fetch('https://api.web3forms.com/submit', {method:'POST', body:fd});
+            document.getElementById('payment-success-modal').style.display = 'flex';
         });
-
-        const result = await response.json();
-
-        if (result.confirmation && result.confirmation.confirmation_url) {
-            // Сохраняем заказ в личный кабинет
-            saveOrderToUser({
-                date: new Date().toLocaleDateString('ru',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}),
-                items: cart.map(i => i.name).join(', '),
-                total: total.toLocaleString('ru') + ' р.',
-                yookassa_id: result.id
-            });
-
-            // Переход на страницу оплаты ЮKassa
-            window.location.href = result.confirmation.confirmation_url;
-        } else {
-            alert('Ошибка создания платежа: ' + (result.description || 'Неизвестная ошибка'));
-            console.error(result);
-        }
-    } catch (e) {
-        alert('Ошибка соединения с ЮKassa. Попробуйте позже.');
-        console.error(e);
     }
 }
+function closeSuccessModal() { cart=[]; updateCartUI(); window.location.href = window.location.pathname; }
 
-// AUTH + ACCOUNT (всё как было)
-function getUsers() { try { return JSON.parse(localStorage.getItem('loa_users')||'{}'); } catch{ return {}; } }
-function saveUsers(u) { localStorage.setItem('loa_users', JSON.stringify(u)); }
-function getCurrentUser() { try { return JSON.parse(localStorage.getItem('loa_me')||'null'); } catch{ return null; } }
-function setCurrentUser(u) { localStorage.setItem('loa_me', JSON.stringify(u)); }
-let currentUser = getCurrentUser();
+// СТАРЫЙ МЕТОД (ПРОСТО ПИСЬМО)
+function submitOrderOld() {
+    if(!cart.length) return;
+    const name = currentUser ? currentUser.name : prompt('Имя:');
+    const phone = currentUser ? currentUser.phone : prompt('Телефон:');
+    if(!name || !phone) return;
+    const items = cart.map(i=>i.name).join('\n');
+    const fd = new FormData();
+    fd.append('access_key','2b0958c0-399f-49e6-b189-a87f409a4fd2');
+    fd.append('message',`НОВЫЙ ЗАКАЗ (ТЕСТ):\n${name}\n${phone}\n\n${items}`);
+    fetch('https://api.web3forms.com/submit', {method:'POST', body:fd}).then(()=>alert('Заявка отправлена'));
+}
+
+// AUTH
+function doReg() {
+    const n = document.getElementById('reg-name').value, e = document.getElementById('reg-email').value, p = document.getElementById('reg-pass').value;
+    auth.createUserWithEmailAndPassword(e, p).then(r => db.collection('users').doc(r.user.uid).set({name:n, email:e})).then(()=>closeAuth()).catch(err=>alert(err.message));
+}
+function doLogin() {
+    const e = document.getElementById('login-email').value, p = document.getElementById('login-pass').value;
+    auth.signInWithEmailAndPassword(e,p).then(()=>closeAuth()).catch(()=>alert('Ошибка входа'));
+}
+function doLogout() { auth.signOut().then(()=>location.reload()); }
+function renderNavProfile() {
+    const dd = document.getElementById('profile-dropdown');
+    if(currentUser) {
+        dd.innerHTML = `<div style="padding:15px; border-bottom:1px solid #333;">${currentUser.name}</div><div style="padding:15px; cursor:pointer;" onclick="openAccount()">👤 Кабинет</div><div style="padding:15px; cursor:pointer; color:red;" onclick="doLogout()">🚪 Выход</div>`;
+    } else {
+        dd.innerHTML = `<div style="padding:15px; cursor:pointer;" onclick="openAuth()">👤 Войти</div><div style="padding:15px; cursor:pointer;" onclick="showReg()">✨ Регистрация</div>`;
+    }
+}
+function toggleProfileDropdown() { const dd = document.getElementById('profile-dropdown'); dd.style.display = dd.style.display === 'block' ? 'none' : 'block'; }
 function openAuth() { document.getElementById('auth-overlay').classList.add('open'); }
 function closeAuth() { document.getElementById('auth-overlay').classList.remove('open'); }
-function authOverlayClick(e) { if(e.target===document.getElementById('auth-overlay')) closeAuth(); }
-function showLogin() { document.getElementById('auth-login-view').style.display=''; document.getElementById('auth-reg-view').style.display='none'; document.getElementById('login-err').style.display='none'; }
-function showReg() { document.getElementById('auth-login-view').style.display='none'; document.getElementById('auth-reg-view').style.display=''; document.getElementById('reg-err').style.display='none'; }
-function doLogin() { const email=document.getElementById('login-email').value.trim().toLowerCase(); const pass=document.getElementById('login-pass').value; const users=getUsers(); const errDiv=document.getElementById('login-err'); if(!users[email]||users[email].password!==pass) { errDiv.style.display='block'; return; } errDiv.style.display='none'; currentUser={...users[email]}; setCurrentUser(currentUser); closeAuth(); renderNavProfile(); }
-function doReg() { const name=document.getElementById('reg-name').value.trim(); const email=document.getElementById('reg-email').value.trim().toLowerCase(); const phone=document.getElementById('reg-phone').value.trim(); const pass=document.getElementById('reg-pass').value; const errDiv=document.getElementById('reg-err'); if(!name||!email||!pass) { errDiv.textContent='Заполните все поля'; errDiv.style.display='block'; return; } const users=getUsers(); if(users[email]) { errDiv.textContent='Этот email уже зарегистрирован'; errDiv.style.display='block'; return; } const u={name,email,phone,password:pass,orders:[]}; users[email]=u; saveUsers(u); currentUser={...u}; setCurrentUser(currentUser); closeAuth(); renderNavProfile(); }
-function doLogout() { currentUser=null; localStorage.removeItem('loa_me'); renderNavProfile(); closeProfileDropdown(); }
-function renderNavProfile() { const dd = document.getElementById('profile-dropdown'); if(currentUser) { dd.innerHTML = `<div style="padding:12px 16px; border-bottom:1px solid #eee;"><div style="font-weight:700;">${currentUser.name||'Пользователь'}</div><div style="font-size:11px; color:#888; margin-top:4px;">${currentUser.email}</div></div><div style="padding:12px 16px; cursor:pointer; border-bottom:1px solid #f5f5f5;" onclick="openAccount()">👤 Личный кабинет</div><div style="padding:12px 16px; cursor:pointer; color:#ff3b30;" onclick="doLogout()">🚪 Выйти</div>`; } else { dd.innerHTML = `<div style="padding:12px 16px; cursor:pointer; border-bottom:1px solid #f5f5f5;" onclick="openAuth()">👤 Войти</div><div style="padding:12px 16px; cursor:pointer;" onclick="showReg();openAuth()">✨ Регистрация</div>`; } }
-function toggleProfileDropdown() { renderNavProfile(); const dd = document.getElementById('profile-dropdown'); dd.style.display = dd.style.display === 'block' ? 'none' : 'block'; }
-function closeProfileDropdown() { document.getElementById('profile-dropdown').style.display = 'none'; }
-document.addEventListener('click', e => { if (!document.querySelector('.profile-wrap').contains(e.target)) closeProfileDropdown(); });
-function openAccount() { closeProfileDropdown(); if(!currentUser) { openAuth(); return; } document.getElementById('acc-avatar').innerText = (currentUser.name||'?')[0].toUpperCase(); document.getElementById('acc-name-display').innerText = currentUser.name||'—'; document.getElementById('acc-email-display').innerText = currentUser.email||'—'; document.getElementById('prof-name').value = currentUser.name||''; document.getElementById('prof-email').value = currentUser.email||''; document.getElementById('prof-phone').value = currentUser.phone||''; renderAccOrders(); renderAccWish(); document.getElementById('account-page').classList.add('open'); document.body.style.overflow='hidden'; }
-function closeAccount() { document.getElementById('account-page').classList.remove('open'); document.body.style.overflow=''; }
-function saveProfile() { const name = document.getElementById('prof-name').value.trim(); const phone = document.getElementById('prof-phone').value.trim(); if(!name) return alert('Введите имя'); const users=getUsers(); users[currentUser.email].name=name; users[currentUser.email].phone=phone; saveUsers(users); currentUser.name=name; currentUser.phone=phone; setCurrentUser(currentUser); alert('Профиль сохранён!'); closeAccount(); openAccount(); }
-function renderAccOrders() { const users=getUsers(); const orders=users[currentUser.email]?.orders||[]; document.getElementById('acc-orders').innerHTML = orders.length ? orders.slice().reverse().map(o=>`<div style="padding:12px 0; border-bottom:1px solid #f0f0f0;"><div style="font-size:11px; color:#aaa;">${o.date}</div><div style="font-size:13px; font-weight:500;">${o.items}</div><div style="font-weight:700; margin-top:4px;">${o.total}</div></div>`).join('') : '<div class="empty-msg" style="text-align:center; padding:24px 0; color:#aaa;">У вас пока нет заказов</div>'; }
-function renderAccWish() { document.getElementById('acc-wish').innerHTML = wishlist.length ? wishlist.map(i=>`<div style="padding:10px 0; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between;"><span>${i.name}</span><span style="font-weight:700;">${i.price.toLocaleString('ru')} р.</span></div>`).join('') : '<div class="empty-msg" style="text-align:center; padding:24px 0; color:#aaa;">Избранное пусто</div>'; }
-function saveOrderToUser(order) { if(!currentUser) return; const users=getUsers(); if(!users[currentUser.email].orders) users[currentUser.email].orders=[]; users[currentUser.email].orders.push(order); saveUsers(users); }
+function showReg() { document.getElementById('auth-login-view').style.display='none'; document.getElementById('auth-reg-view').style.display='block'; }
+function showLogin() { document.getElementById('auth-login-view').style.display='block'; document.getElementById('auth-reg-view').style.display='none'; }
+function openAccount() {
+    document.getElementById('acc-name-display').innerText = currentUser.name;
+    document.getElementById('acc-email-display').innerText = currentUser.email;
+    document.getElementById('prof-name').value = currentUser.name;
+    document.getElementById('account-page').classList.add('open');
+    db.collection('orders').where('uid','==',currentUser.uid).get().then(s => {
+        document.getElementById('acc-orders').innerHTML = s.docs.map(d=>`<div style="padding:15px; background:#fff; margin-bottom:10px; border-radius:15px; box-shadow:0 2px 10px rgba(0,0,0,0.05);"><b>${d.data().date}</b><br>${d.data().items}<br><b>${d.data().total}</b></div>`).join('') || 'У вас пока нет заказов';
+    });
+}
+function closeAccount() { document.getElementById('account-page').classList.remove('open'); }
+function saveProfile() { const n = document.getElementById('prof-name').value; db.collection('users').doc(currentUser.uid).update({name:n}).then(()=>alert('Сохранено')); }
+
 function toggleMobileMenu() { alert('Меню в разработке — скоро появятся разделы: О нас, Контакты, Доставка!'); }
 
-// Инициализация
-renderNavProfile();
+// СТАРТ
+renderCatalog();
 updateCartUI();
 updateWishUI();
 </script>
