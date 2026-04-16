@@ -403,6 +403,22 @@ function updateWishUI() {
 }
 function toggleWishSidebar() { document.getElementById('wish-sidebar').classList.toggle('open'); document.getElementById('wish-overlay').classList.toggle('open'); }
 
+// TELEGRAM УВЕДОМЛЕНИЯ
+const TG_TOKEN = '8768620261:AAFheSJF-XNAy1Aum1xA7S994k8H2tbgOxg';
+const TG_CHAT_ID = '7984183942';
+
+function sendTelegramNotification(message) {
+    fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: TG_CHAT_ID,
+            text: message,
+            parse_mode: 'HTML'
+        })
+    }).catch(err => console.log('TG error:', err));
+}
+
 // ОПЛАТА ЮMONEY
 function payWithYooMoney() {
     if(!currentUser) return openAuth();
@@ -427,6 +443,14 @@ function checkSuccess() {
             fd.append('access_key','2b0958c0-399f-49e6-b189-a87f409a4fd2');
             fd.append('message',`ЗАКАЗ ОПЛАЧЕН!\nКлиент: ${currentUser.name}\nТовары: ${order.items}\nСумма: ${order.total}`);
             fetch('https://api.web3forms.com/submit', {method:'POST', body:fd});
+            sendTelegramNotification(
+                `🛍 <b>НОВЫЙ ЗАКАЗ (ОПЛАЧЕН)</b>\n\n` +
+                `👤 Клиент: ${currentUser.name}\n` +
+                `📧 Email: ${currentUser.email}\n` +
+                `📦 Товары: ${order.items}\n` +
+                `💰 Сумма: ${order.total}\n` +
+                `🕐 Дата: ${order.date}`
+            );
             document.getElementById('payment-success-modal').style.display = 'flex';
         });
     }
@@ -443,7 +467,17 @@ function submitOrderOld() {
     const fd = new FormData();
     fd.append('access_key','2b0958c0-399f-49e6-b189-a87f409a4fd2');
     fd.append('message',`НОВЫЙ ЗАКАЗ (ТЕСТ):\n${name}\n${phone}\n\n${items}`);
-    fetch('https://api.web3forms.com/submit', {method:'POST', body:fd}).then(()=>alert('Заявка отправлена'));
+    fetch('https://api.web3forms.com/submit', {method:'POST', body:fd}).then(()=>{
+        sendTelegramNotification(
+            `🛍 <b>НОВЫЙ ЗАКАЗ</b>\n\n` +
+            `👤 Клиент: ${name}\n` +
+            `📱 Телефон: ${phone}\n` +
+            `📦 Товары:\n${items}\n` +
+            `💰 Сумма: ${cart.reduce((s,i)=>s+i.price,0)} р.\n` +
+            `🕐 Дата: ${new Date().toLocaleString('ru')}`
+        );
+        alert('Заявка отправлена');
+    });
 }
 
 // AUTH
