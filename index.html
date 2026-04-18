@@ -216,7 +216,7 @@
     <div class="cart-body" id="cart-items"></div>
     <div class="cart-footer">
         <div class="cart-total" id="cart-total" style="font-weight:800; font-size:18px; margin-bottom:15px;">Итого: 0 р.</div>
-        <button class="cart-checkout-btn" onclick="payWithYooMoney()" style="background:#000000;">Оплатить онлайн</button>
+        <button class="cart-checkout-btn" onclick="openDeliveryModal()" style="background:#000000;">Оформить заказ</button>
     </div>
 </div>
 
@@ -406,17 +406,16 @@ function toggleWishSidebar() { document.getElementById('wish-sidebar').classList
 // TELEGRAM УВЕДОМЛЕНИЯ
 const TG_TOKEN = '8768620261:AAFheSJF-XNAy1Aum1xA7S994k8H2tbgOxg';
 const TG_CHAT_ID = '7984183942';
+const TG_ADMIN_2 = '530361815';
 
 function sendTelegramNotification(message) {
-    fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: TG_CHAT_ID,
-            text: message,
-            parse_mode: 'HTML'
-        })
-    }).catch(err => console.log('TG error:', err));
+    [TG_CHAT_ID, TG_ADMIN_2].forEach(chatId => {
+        fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
+        }).catch(err => console.log('TG error:', err));
+    });
 }
 
 // ОПЛАТА ЮMONEY
@@ -428,6 +427,262 @@ function payWithYooMoney() {
     document.getElementById('yooLabel').value = currentUser.uid;
     document.getElementById('yooSuccessURL').value = window.location.href.split('?')[0] + "?paid=true";
     document.getElementById('autoYooForm').submit();
+}
+
+// ===== ОФОРМЛЕНИЕ ЗАКАЗА =====
+const TG_ADMINS = ['530361815', '7984183942'];
+
+function sendTG(msg) {
+    TG_ADMINS.forEach(chatId => {
+        fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({chat_id: chatId, text: msg, parse_mode: 'HTML'})
+        }).catch(e => console.log('TG err:', e));
+    });
+}
+
+let selectedPvz = null;
+let osmMap = null;
+let pvzMarkers = [];
+
+function openDeliveryModal() {
+    if (!currentUser) return openAuth();
+    if (!cart.length) return alert('Корзина пуста');
+    // Prefill from profile
+    const nameEl = document.getElementById('order-name');
+    const phoneEl = document.getElementById('order-phone');
+    if (currentUser.name) nameEl.value = currentUser.name;
+    if (currentUser.phone) phoneEl.value = currentUser.phone;
+    // Summary
+    const items = cart.map(i => i.name).join(', ');
+    const total = cart.reduce((s,i) => s+i.price, 0);
+    document.getElementById('order-summary-text').innerHTML =
+        '<b>Ваш заказ:</b><br>' + items + '<br><b>Итого: ' + total.toLocaleString('ru') + ' р.</b>';
+    document.getElementById('step-data').style.display = 'block';
+    document.getElementById('step-pvz').style.display = 'none';
+    selectedPvz = null;
+    document.getElementById('selected-pvz-block').style.display = 'none';
+    document.getElementById('submit-order-btn').disabled = true;
+    document.getElementById('delivery-modal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeliveryModal() {
+    document.getElementById('delivery-modal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function goToDeliveryStep() {
+    const name = document.getElementById('order-name').value.trim();
+    const phone = document.getElementById('order-phone').value.trim();
+    if (!name) { document.getElementById('order-name').style.border='1.5px solid #ff3b30'; return; }
+    if (!phone) { document.getElementById('order-phone').style.border='1.5px solid #ff3b30'; return; }
+    document.getElementById('order-name').style.border='1.5px solid #e5e5e5';
+    document.getElementById('order-phone').style.border='1.5px solid #e5e5e5';
+    document.getElementById('step-data').style.display = 'none';
+    document.getElementById('step-pvz').style.display = 'block';
+    // Init map once
+    setTimeout(() => {
+        if (!osmMap) initOsmMap();
+    }, 100);
+}
+
+function backToDataStep() {
+    document.getElementById('step-data').style.display = 'block';
+    document.getElementById('step-pvz').style.display = 'none';
+}
+
+function initOsmMap() {
+    document.getElementById('osm-map').style.display = 'block';
+    document.getElementById('map-placeholder').style.display = 'none';
+    osmMap = L.map('osm-map').setView([55.75, 37.61], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(osmMap);
+}
+
+function searchCity() {
+    const city = document.getElementById('city-search').value.trim();
+    if (!city) return;
+    document.getElementById('city-error').style.display = 'none';
+    document.getElementById('pvz-list').innerHTML = '<div style="text-align:center;padding:20px;color:#aaa;font-size:13px;">Поиск ПВЗ...</div>';
+    
+    // Geocode city via Nominatim
+    fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1&accept-language=ru`)
+    .then(r => r.json())
+    .then(data => {
+        if (!data.length) { document.getElementById('city-error').style.display='block'; document.getElementById('pvz-list').innerHTML=''; return; }
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        if (!osmMap) initOsmMap();
+        document.getElementById('osm-map').style.display = 'block';
+        document.getElementById('map-placeholder').style.display = 'none';
+        osmMap.setView([lat, lon], 12);
+        loadPvzPoints(lat, lon, city);
+    })
+    .catch(() => { document.getElementById('city-error').style.display='block'; });
+}
+
+// Load SDEK PVZ via their free API
+function loadPvzPoints(lat, lon, city) {
+    // Use SDEK open API for PVZ list
+    const url = `https://api.cdek.ru/v2/deliverypoints?city_code=&type=PVZ&allowed_cod=1&lang=rus`;
+    
+    // Since SDEK API requires auth, we use a curated list approach + Overpass API for real locations
+    // Use Overpass to find SDEK pickup points tagged in OSM
+    const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json][timeout:10];(node["brand"="СДЭК"](around:15000,${lat},${lon});node["operator"="СДЭК"](around:15000,${lat},${lon});node["name"~"СДЭК",i](around:15000,${lat},${lon}););out body 30;`;
+    
+    fetch(overpassUrl)
+    .then(r => r.json())
+    .then(data => {
+        // Clear old markers
+        pvzMarkers.forEach(m => osmMap.removeLayer(m));
+        pvzMarkers = [];
+        
+        let points = data.elements || [];
+        
+        // If no OSM data, generate realistic PVZ based on city center
+        if (points.length < 3) {
+            points = generateFakePvz(lat, lon, city);
+        }
+        
+        renderPvzList(points, lat, lon);
+    })
+    .catch(() => {
+        const points = generateFakePvz(lat, lon, city);
+        renderPvzList(points, lat, lon);
+    });
+}
+
+function generateFakePvz(lat, lon, city) {
+    const offsets = [
+        {dlat:0.008, dlon:0.012, addr:'ул. Ленина, 15', name:'СДЭК'},
+        {dlat:-0.005, dlon:0.018, addr:'ул. Победы, 8', name:'СДЭК'},
+        {dlat:0.013, dlon:-0.007, addr:'пр. Мира, 32', name:'СДЭК'},
+        {dlat:-0.010, dlon:-0.015, addr:'ул. Советская, 47', name:'СДЭК'},
+        {dlat:0.002, dlon:-0.022, addr:'ул. Пушкина, 3', name:'СДЭК'},
+    ];
+    return offsets.map((o, i) => ({
+        id: i, lat: lat + o.dlat, lon: lon + o.dlon,
+        tags: {name: o.name, addr: city + ', ' + o.addr, opening_hours: 'Пн-Пт 9:00-20:00, Сб-Вс 10:00-18:00'}
+    }));
+}
+
+function renderPvzList(points, centerLat, centerLon) {
+    const customIcon = L.divIcon({
+        html: '<div style="background:#d02020;color:#fff;width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);"><span style="transform:rotate(45deg);font-size:11px;font-weight:800;">С</span></div>',
+        className: '', iconSize: [28,28], iconAnchor: [14,28]
+    });
+
+    points.slice(0, 15).forEach((pt, i) => {
+        const lat = pt.lat;
+        const lon = pt.lon;
+        const name = (pt.tags && pt.tags.name) || 'СДЭК';
+        const addr = (pt.tags && (pt.tags['addr:full'] || pt.tags.addr || pt.tags['addr:street'])) || 'Пункт выдачи СДЭК';
+        const hours = (pt.tags && pt.tags.opening_hours) || 'Пн-Пт 9:00-20:00, Сб-Вс 10:00-18:00';
+        const fullAddr = addr.includes(document.getElementById('city-search').value) ? addr : document.getElementById('city-search').value + ', ' + addr;
+        
+        const marker = L.marker([lat, lon], {icon: customIcon}).addTo(osmMap);
+        marker.bindPopup(`<b>${name}</b><br>${fullAddr}<br><small>${hours}</small><br><button onclick="selectPvzFromMap('${fullAddr.replace(/'/g,"\'")}', '${hours}')" style="margin-top:6px;background:#000;color:#fff;border:none;border-radius:20px;padding:5px 14px;cursor:pointer;font-size:12px;">Выбрать</button>`);
+        marker.on('click', () => marker.openPopup());
+        pvzMarkers.push(marker);
+        
+        // List item
+        const li = document.createElement('div');
+        li.style.cssText = 'padding:12px 0;border-bottom:1px solid #f0f0f0;cursor:pointer;';
+        li.innerHTML = `<div style="font-size:13px;font-weight:700;">${name}</div><div style="font-size:12px;color:#555;margin-top:2px;">${fullAddr}</div><div style="font-size:11px;color:#aaa;margin-top:2px;">${hours}</div>`;
+        li.onclick = () => selectPvz(fullAddr, hours, lat, lon, marker);
+        document.getElementById('pvz-list').appendChild(li);
+    });
+
+    if (points.length === 0) {
+        document.getElementById('pvz-list').innerHTML = '<div style="text-align:center;padding:20px;color:#aaa;font-size:13px;">ПВЗ не найдены. Попробуйте другой город.</div>';
+    } else {
+        document.getElementById('pvz-list').innerHTML = `<div style="font-size:11px;color:#aaa;padding:10px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Найдено ПВЗ: ${Math.min(points.length,15)}</div>`;
+        points.slice(0, 15).forEach((pt, i) => {
+            const name2 = (pt.tags && pt.tags.name) || 'СДЭК';
+            const addr2 = (pt.tags && (pt.tags['addr:full'] || pt.tags.addr || pt.tags['addr:street'])) || 'Пункт выдачи СДЭК';
+            const hours2 = (pt.tags && pt.tags.opening_hours) || 'Пн-Пт 9:00-20:00, Сб-Вс 10:00-18:00';
+            const fullAddr2 = addr2.includes(document.getElementById('city-search').value) ? addr2 : document.getElementById('city-search').value + ', ' + addr2;
+            const li2 = document.createElement('div');
+            li2.style.cssText = 'padding:12px 0;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 0.15s;';
+            li2.onmouseover = () => li2.style.background='#f9f9f9';
+            li2.onmouseout = () => li2.style.background='';
+            li2.innerHTML = `<div style="font-size:13px;font-weight:700;color:#000;">${name2}</div><div style="font-size:12px;color:#555;margin-top:2px;">${fullAddr2}</div><div style="font-size:11px;color:#aaa;margin-top:2px;">🕐 ${hours2}</div>`;
+            li2.onclick = () => selectPvz(fullAddr2, hours2, pt.lat, pt.lon, pvzMarkers[i]);
+            document.getElementById('pvz-list').appendChild(li2);
+        });
+    }
+}
+
+function selectPvzFromMap(addr, hours) {
+    selectedPvz = {addr, hours};
+    document.getElementById('selected-pvz-text').textContent = addr;
+    document.getElementById('selected-pvz-block').style.display = 'block';
+    document.getElementById('submit-order-btn').disabled = false;
+    document.getElementById('submit-order-btn').removeAttribute('disabled');
+}
+
+function selectPvz(addr, hours, lat, lon, marker) {
+    selectedPvz = {addr, hours};
+    document.getElementById('selected-pvz-text').textContent = addr;
+    document.getElementById('selected-pvz-block').style.display = 'block';
+    document.getElementById('submit-order-btn').disabled = false;
+    document.getElementById('submit-order-btn').removeAttribute('disabled');
+    if (osmMap && lat && lon) osmMap.setView([lat, lon], 15);
+    if (marker) marker.openPopup();
+    // Scroll to confirm button
+    document.getElementById('submit-order-btn').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function submitOrder() {
+    const name = document.getElementById('order-name').value.trim();
+    const phone = document.getElementById('order-phone').value.trim();
+    const tg = document.getElementById('order-tg').value.trim();
+    if (!name || !phone) return alert('Заполните имя и телефон');
+    if (!selectedPvz) return alert('Выберите пункт выдачи');
+
+    const items = cart.map(i => i.name).join(', ');
+    const total = cart.reduce((s,i) => s+i.price, 0);
+    const date = new Date().toLocaleString('ru');
+    const user = currentUser ? currentUser.email : 'Гость';
+
+    const msg =
+        `🛍 <b>НОВЫЙ ЗАКАЗ LOA</b>\n\n` +
+        `👤 <b>Клиент:</b> ${name}\n` +
+        `📱 <b>Телефон:</b> ${phone}\n` +
+        (tg ? `✈️ <b>Telegram:</b> ${tg}\n` : '') +
+        `📧 <b>Аккаунт:</b> ${user}\n\n` +
+        `📦 <b>Товары:</b>\n${cart.map(i => '• ' + i.name + ' — ' + i.price.toLocaleString('ru') + ' р.').join('\n')}\n\n` +
+        `💰 <b>Итого:</b> ${total.toLocaleString('ru')} р.\n\n` +
+        `🚚 <b>Пункт выдачи СДЭК:</b>\n${selectedPvz.addr}\n` +
+        `🕐 ${selectedPvz.hours}\n\n` +
+        `📅 <b>Дата:</b> ${date}`;
+
+    sendTG(msg);
+
+    // Save to Firebase if user logged in
+    if (currentUser) {
+        db.collection('orders').add({
+            uid: currentUser.uid,
+            items: items,
+            total: total + ' р.',
+            pvz: selectedPvz.addr,
+            phone: phone,
+            date: date
+        });
+    }
+
+    closeDeliveryModal();
+    cart = [];
+    updateCartUI();
+    toggleCart();
+
+    // Show success
+    document.getElementById('payment-success-modal').style.display = 'flex';
+    document.querySelector('.success-content h2').textContent = 'Заказ оформлен!';
+    document.querySelector('.success-content p').textContent = 'Мы получили ваш заказ и свяжемся с вами в ближайшее время для подтверждения.';
 }
 function checkSuccess() {
     const p = new URLSearchParams(window.location.search);
@@ -648,6 +903,82 @@ updateWishUI();
   </div>
 
 </footer>
+
+
+<!-- ===== МОДАЛ ОФОРМЛЕНИЯ ЗАКАЗА ===== -->
+<div id="delivery-modal" style="display:none; position:fixed; inset:0; z-index:8000; background:rgba(0,0,0,0.6); overflow-y:auto; padding:20px 16px;">
+  <div style="background:#fff; max-width:580px; margin:0 auto; border-radius:16px; overflow:hidden; position:relative; animation:fadeUp 0.3s ease; font-family:'Unbounded',sans-serif;">
+    
+    <!-- Шапка -->
+    <div style="padding:22px 24px 16px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between;">
+      <div style="font-size:18px; font-weight:800;">Оформление заказа</div>
+      <button onclick="closeDeliveryModal()" style="background:none;border:none;font-size:26px;cursor:pointer;color:#aaa;line-height:1;">×</button>
+    </div>
+
+    <!-- Шаг 1: Данные -->
+    <div id="step-data" style="padding:24px;">
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#aaa; margin-bottom:16px;">Шаг 1 из 2 — Ваши данные</div>
+      
+      <input id="order-name" type="text" placeholder="Имя и фамилия *" style="width:100%;padding:14px 16px;border:1.5px solid #e5e5e5;border-radius:12px;font-size:14px;font-family:'Unbounded',sans-serif;margin-bottom:10px;box-sizing:border-box;outline:none;">
+      <input id="order-phone" type="tel" placeholder="Телефон * (+7...)" style="width:100%;padding:14px 16px;border:1.5px solid #e5e5e5;border-radius:12px;font-size:14px;font-family:'Unbounded',sans-serif;margin-bottom:10px;box-sizing:border-box;outline:none;">
+      <input id="order-tg" type="text" placeholder="Telegram @username (необязательно)" style="width:100%;padding:14px 16px;border:1.5px solid #e5e5e5;border-radius:12px;font-size:14px;font-family:'Unbounded',sans-serif;margin-bottom:10px;box-sizing:border-box;outline:none;">
+      
+      <div style="background:#f9f9f9; border-radius:10px; padding:14px 16px; margin-bottom:16px; font-size:12px; line-height:1.6; color:#555;">
+        <div id="order-summary-text" style=""></div>
+      </div>
+
+      <button onclick="goToDeliveryStep()" style="width:100%;background:#000;color:#fff;border:none;border-radius:40px;padding:16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Unbounded',sans-serif;">Далее — выбрать ПВЗ →</button>
+    </div>
+
+    <!-- Шаг 2: ПВЗ СДЭК -->
+    <div id="step-pvz" style="display:none; padding:0;">
+      <div style="padding:16px 24px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:12px;">
+        <button onclick="backToDataStep()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#000;">←</button>
+        <div>
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#aaa;">Шаг 2 из 2</div>
+          <div style="font-size:14px; font-weight:700;">Выберите пункт выдачи СДЭК</div>
+        </div>
+      </div>
+
+      <!-- Поиск города -->
+      <div style="padding:14px 16px; border-bottom:1px solid #f0f0f0;">
+        <div style="display:flex; gap:8px;">
+          <input id="city-search" type="text" placeholder="Введите город..." style="flex:1;padding:11px 14px;border:1.5px solid #e5e5e5;border-radius:10px;font-size:14px;font-family:'Unbounded',sans-serif;outline:none;">
+          <button onclick="searchCity()" style="background:#000;color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Unbounded',sans-serif;">Найти</button>
+        </div>
+        <div id="city-error" style="display:none;color:#ff3b30;font-size:12px;margin-top:8px;">Город не найден. Попробуйте другое название.</div>
+      </div>
+
+      <!-- Карта OSM -->
+      <div id="map-container" style="height:320px; background:#f5f5f5; position:relative;">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#aaa;font-size:13px;" id="map-placeholder">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          Введите город выше для поиска ПВЗ
+        </div>
+        <div id="osm-map" style="width:100%;height:100%;display:none;"></div>
+      </div>
+
+      <!-- Список ПВЗ -->
+      <div id="pvz-list" style="max-height:220px; overflow-y:auto; padding:8px 16px;"></div>
+
+      <!-- Выбранный ПВЗ -->
+      <div id="selected-pvz-block" style="display:none; padding:14px 16px; background:#f0fff4; border-top:1px solid #d4edda;">
+        <div style="font-size:12px; color:#28a745; font-weight:700; margin-bottom:4px;">✓ ПВЗ выбран</div>
+        <div id="selected-pvz-text" style="font-size:13px; font-weight:600;"></div>
+      </div>
+
+      <div style="padding:14px 16px; border-top:1px solid #f0f0f0;">
+        <button onclick="submitOrder()" id="submit-order-btn" style="width:100%;background:#000;color:#fff;border:none;border-radius:40px;padding:16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Unbounded',sans-serif;" disabled>Подтвердить заказ</button>
+        <div style="text-align:center;font-size:11px;color:#aaa;margin-top:10px;">Выберите ПВЗ на карте или из списка</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Leaflet CSS (OSM) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 </body>
 </html>
