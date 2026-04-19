@@ -76,7 +76,7 @@ export default async function handler(req, res) {
     }
 
     // Парсим /status_DOCID_statuskey
-    const match = text.match(/^\/status_([a-zA-Z0-9]+)_([a-z]+)$/);
+    const match = text.replace(/@\w+/, '').trim().match(/^\/status_([a-zA-Z0-9]+)_([a-z]+)$/);
     if (!match) return res.status(200).json({ ok: true });
 
     const docId = match[1];
