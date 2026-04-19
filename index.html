@@ -65,15 +65,22 @@
         .marquee-inner { display: inline-block; animation: marquee 12s linear infinite; font-size: 13px; letter-spacing: 3px; font-weight: 500; text-transform: uppercase; padding-right: 20px; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        .gallery { position: relative; height: 70vh; min-height: 500px; overflow: hidden; }
-        .gallery-slides { display: flex; height: 100%; transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
-        .gallery-slide { min-width: 100%; height: 100%; background-size: cover; background-position: center; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 50px; }
-        .gallery-slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.8)); }
-        .gallery-slide-name { font-size: clamp(18px, 5vw, 24px); font-weight: 700; margin-bottom: 20px; text-align: center; }
-        .gallery-cart-btn { background: #fff; color: #000; border: none; border-radius: 40px; padding: 12px 32px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Unbounded'; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .gallery-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
-        .gallery-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; }
-        .gallery-dot.active { width: 20px; border-radius: 4px; background: #fff; }
+        .gallery { position: relative; height: 80vh; min-height: 520px; overflow: hidden; }
+        .gallery-slides { display: flex; height: 100%; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+        .gallery-slide { min-width: 100%; height: 100%; background-size: cover; background-position: center; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 60px; }
+        .gallery-slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,0.75) 100%); }
+        .gallery-slide-content { position: relative; z-index: 5; text-align: center; width: 100%; padding: 0 24px; }
+        .gallery-slide-name { font-size: clamp(22px, 5vw, 36px); font-weight: 800; color: #fff; margin-bottom: 6px; letter-spacing: -0.5px; text-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+        .gallery-slide-price { font-size: 16px; color: rgba(255,255,255,0.75); font-weight: 500; margin-bottom: 20px; }
+        .gallery-cart-btn { display: inline-block; background: #fff; color: #000; border: none; border-radius: 50px; padding: 14px 40px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Unbounded', sans-serif; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: transform 0.15s, box-shadow 0.15s; position: relative; z-index: 5; }
+        .gallery-cart-btn:hover { transform: scale(1.04); box-shadow: 0 6px 28px rgba(0,0,0,0.4); }
+        .gallery-cart-btn:active { transform: scale(0.97); }
+        .gallery-arrows { position: absolute; top: 50%; transform: translateY(-50%); width: 100%; display: flex; justify-content: space-between; padding: 0 16px; z-index: 10; pointer-events: none; box-sizing: border-box; }
+        .gallery-arrow-btn { pointer-events: all; background: rgba(255,255,255,0.15); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.25); color: #fff; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .gallery-arrow-btn:hover { background: rgba(255,255,255,0.3); }
+        .gallery-dots { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+        .gallery-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.35); cursor: pointer; transition: all 0.3s; }
+        .gallery-dot.active { width: 24px; border-radius: 4px; background: #fff; }
 
         .product-page { position: fixed; inset: 0; z-index: 4000; display: none; align-items: flex-start; justify-content: center; padding: 50px 16px 20px; overflow-y: auto; }
         .product-page.open { display: flex; }
@@ -182,11 +189,37 @@
 <!-- GALLERY -->
 <section class="gallery" id="gallery">
     <div class="gallery-slides" id="gallery-slides">
-        <div class="gallery-slide" style="background-image:url('https://static.tildacdn.com/tild6533-6537-4531-a461-333766623465/photo_2026-02-18_11-.jpg')"><div class="gallery-slide-content"><div class="gallery-slide-name">Худи "Loa"</div><button class="gallery-cart-btn" onclick="addToCart(2,'Худи Loa',5000)">В корзину</button></div></div>
-        <div class="gallery-slide" style="background-image:url('https://static.tildacdn.com/tild3730-6434-4134-b064-316263353363/photo.jpg')"><div class="gallery-slide-content"><div class="gallery-slide-name">Футболка "Loa" BLACK</div><button class="gallery-cart-btn" onclick="addToCart(3,'Футболка Loa BLACK',3500)">В корзину</button></div></div>
-        <div class="gallery-slide" style="background-image:url('https://static.tildacdn.com/tild3932-6465-4234-a164-383033353037/photo_2026-02-18_09-.jpg')"><div class="gallery-slide-content"><div class="gallery-slide-name">Футболка "Loa" WHITE</div><button class="gallery-cart-btn" onclick="addToCart(4,'Футболка Loa WHITE',3500)">В корзину</button></div></div>
+        <div class="gallery-slide" style="background-image:url('https://static.tildacdn.com/tild6533-6537-4531-a461-333766623465/photo_2026-02-18_11-.jpg')">
+            <div class="gallery-slide-content">
+                <div class="gallery-slide-name">Худи "Loa"</div>
+                <div class="gallery-slide-price">5 000 р.</div>
+                <button class="gallery-cart-btn" onclick="addToCart(2,'Худи Loa',5000)">В корзину</button>
+            </div>
+        </div>
+        <div class="gallery-slide" style="background-image:url('https://static.tildacdn.com/tild3730-6434-4134-b064-316263353363/photo.jpg')">
+            <div class="gallery-slide-content">
+                <div class="gallery-slide-name">Футболка "Loa" BLACK</div>
+                <div class="gallery-slide-price">3 500 р.</div>
+                <button class="gallery-cart-btn" onclick="addToCart(3,'Футболка Loa BLACK',3500)">В корзину</button>
+            </div>
+        </div>
+        <div class="gallery-slide" style="background-image:url('https://static.tildacdn.com/tild3932-6465-4234-a164-383033353037/photo_2026-02-18_09-.jpg')">
+            <div class="gallery-slide-content">
+                <div class="gallery-slide-name">Футболка "Loa" WHITE</div>
+                <div class="gallery-slide-price">3 500 р.</div>
+                <button class="gallery-cart-btn" onclick="addToCart(4,'Футболка Loa WHITE',3500)">В корзину</button>
+            </div>
+        </div>
     </div>
-    <div class="gallery-dots" id="gallery-dots"><div class="gallery-dot active" onclick="goGallery(0)"></div><div class="gallery-dot" onclick="goGallery(1)"></div><div class="gallery-dot" onclick="goGallery(2)"></div></div>
+    <div class="gallery-arrows">
+        <button class="gallery-arrow-btn" onclick="goGallery((galIdx-1+3)%3)">&#8249;</button>
+        <button class="gallery-arrow-btn" onclick="goGallery((galIdx+1)%3)">&#8250;</button>
+    </div>
+    <div class="gallery-dots" id="gallery-dots">
+        <div class="gallery-dot active" onclick="goGallery(0)"></div>
+        <div class="gallery-dot" onclick="goGallery(1)"></div>
+        <div class="gallery-dot" onclick="goGallery(2)"></div>
+    </div>
 </section>
 
 <!-- OVERLAYS -->
