@@ -796,7 +796,6 @@ function submitOrder() {
                 `━━━━━━━━━━━━━━━━━━\n` +
                 `<b>Управление статусом:</b>\n` +
                 `/status_${docRef.id}_bought — Выкуплено\n` +
-                `/status_${docRef.id}_china — Склад в Китае\n` +
                 `/status_${docRef.id}_shipped — Отправлено\n` +
                 `/status_${docRef.id}_delivered — Доставлено\n` +
                 `/status_${docRef.id}_cancelled — Отменён\n` +
@@ -935,13 +934,12 @@ function closeSideMenu() {
 const ORDER_STATUSES = {
     new:       { label: '🆕 Новый',           class: 'status-new',       step: 0 },
     bought:    { label: '✅ Выкуплено',        class: 'status-bought',    step: 1 },
-    china:     { label: '📦 Склад в Китае',    class: 'status-china',     step: 2 },
     shipped:   { label: '🚚 Отправлено',       class: 'status-shipped',   step: 3 },
     delivered: { label: '🎉 Доставлено',       class: 'status-delivered', step: 4 },
     cancelled: { label: '❌ Отменён',          class: 'status-cancelled', step: -1 },
     refund:    { label: '↩️ Возврат',          class: 'status-refund',    step: -1 },
 };
-const STATUS_STEPS = ['Выкуплено','Склад в Китае','Отправлено','Доставлено'];
+const STATUS_STEPS = ['Выкуплено','Отправлено','Доставлено'];
 
 function renderOrderCard(doc) {
     const d = doc.data();
