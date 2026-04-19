@@ -26,8 +26,10 @@ async function sendTG(chatId, text) {
 async function getFirestoreDoc(docId) {
   const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/orders/${docId}?key=${FIREBASE_API_KEY}`;
   const res = await fetch(url);
+  const json = await res.json();
+  console.log('Firestore response:', JSON.stringify(json));
   if (!res.ok) return null;
-  return res.json();
+  return json;
 }
 
 async function updateOrderStatus(docId, statusKey) {
