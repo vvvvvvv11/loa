@@ -8,7 +8,6 @@ const FIREBASE_API_KEY = 'AIzaSyBOgb-nMQ3_QhShDOEjDxhmXRv-LSoL9OY';
 
 const VALID_STATUSES = {
   bought:    '✅ Выкуплено',
-  china:     '📦 На складе в Китае',
   shipped:   '🚚 Отправлено',
   delivered: '🎉 Доставлено',
   cancelled: '❌ Отменён',
@@ -68,7 +67,6 @@ export default async function handler(req, res) {
         '👋 <b>LOA Admin Bot</b>\n\n' +
         'Используй команды из уведомлений о заказе:\n' +
         '<code>/status_DOCID_bought</code> — Выкуплено\n' +
-        '<code>/status_DOCID_china</code> — Склад в Китае\n' +
         '<code>/status_DOCID_shipped</code> — Отправлено\n' +
         '<code>/status_DOCID_delivered</code> — Доставлено\n' +
         '<code>/status_DOCID_cancelled</code> — Отменён\n' +
