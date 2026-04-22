@@ -1,6 +1,4 @@
 // api/telegram.js
-// Работает без firebase-admin — использует Firebase REST API напрямую
-
 const TG_TOKEN = '8702046980:AAGhDyL4ArgIZckT3PxusNVDHpX6E_cVjOA';
 const ALLOWED_CHAT_IDS = ['530361815', '7984183942'];
 const FIREBASE_PROJECT_ID = 'loashop-32ffd';
@@ -46,22 +44,21 @@ async function updateOrderStatus(docId, statusKey) {
   return res.ok;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(200).json({ ok: true });
 
   try {
-    const message = req.body?.message;
+    const message = req.body && req.body.message;
     if (!message) return res.status(200).json({ ok: true });
 
-    const chatId = String(message.chat?.id);
-    const text = message.text?.trim() || '';
+    const chatId = String(message.chat && message.chat.id);
+    const text = (message.text || '').trim();
 
     if (!ALLOWED_CHAT_IDS.includes(chatId)) {
       await sendTG(chatId, '⛔ У вас нет доступа.');
       return res.status(200).json({ ok: true });
     }
 
-    // /start или /help
     if (text === '/start' || text === '/help') {
       await sendTG(chatId,
         '👋 <b>LOA Admin Bot</b>\n\n' +
@@ -75,7 +72,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // Парсим /status_DOCID_statuskey
     const match = text.replace(/@\w+/, '').trim().match(/^\/status_([a-zA-Z0-9]+)_([a-z]+)$/);
     if (!match) return res.status(200).json({ ok: true });
 
@@ -87,14 +83,12 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // Получаем заказ
     const doc = await getFirestoreDoc(docId);
     if (!doc || doc.error) {
       await sendTG(chatId, `⚠️ Заказ <code>${docId}</code> не найден.`);
       return res.status(200).json({ ok: true });
     }
 
-    // Обновляем статус
     const ok = await updateOrderStatus(docId, statusKey);
     if (!ok) {
       await sendTG(chatId, '❌ Ошибка обновления. Проверь права Firestore.');
@@ -102,9 +96,9 @@ export default async function handler(req, res) {
     }
 
     const fields = doc.fields || {};
-    const name = fields.name?.stringValue || '—';
-    const items = fields.items?.stringValue || '—';
-    const total = fields.total?.stringValue || '—';
+    const name = (fields.name && fields.name.stringValue) || '—';
+    const items = (fields.items && fields.items.stringValue) || '—';
+    const total = (fields.total && fields.total.stringValue) || '—';
     const shortId = docId.slice(-6).toUpperCase();
     const statusLabel = VALID_STATUSES[statusKey];
 
@@ -123,4 +117,4 @@ export default async function handler(req, res) {
     console.error('Webhook error:', err);
     return res.status(200).json({ ok: true });
   }
-}
+};
