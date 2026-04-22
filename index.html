@@ -37,7 +37,6 @@
         .hero { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
         .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: opacity 1.2s ease; }
         .hero-bg-1 { background-image: url('https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg'); opacity: 1; }
-        .hero-bg-2 { background-image: url('https://static.tildacdn.com/tild3730-6434-4134-b064-316263353363/photo.jpg'); opacity: 0; }
         .hero::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 1; }
         .hero-content { position: relative; z-index: 2; padding: 0 16px; }
         .hero-title { font-size: clamp(60px, 15vw, 160px); font-weight: 900; line-height: 1; letter-spacing: -2px; }
@@ -192,8 +191,20 @@
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
             Галерея
         </a>
+        <div class="side-menu-divider"></div>
+        <div class="side-menu-item" onclick="document.getElementById('modal-delivery').style.display='block'; closeSideMenu()">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Доставка и оплата
+        </div>
+        <div class="side-menu-item" onclick="document.getElementById('modal-about').style.display='block'; closeSideMenu()">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            О нас
+        </div>
+        <div class="side-menu-item" onclick="document.getElementById('modal-reviews').style.display='block'; closeSideMenu()">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Отзывы
+        </div>
     </div>
-    <div class="side-menu-footer">© 2025–2026 ООО «ЛОА»</div>
 </div>
 
 <nav class="nav">
@@ -222,7 +233,6 @@
 <!-- HERO -->
 <section class="hero fade-up">
     <div class="hero-bg hero-bg-1" id="hero-bg-1"></div>
-    <div class="hero-bg hero-bg-2" id="hero-bg-2"></div>
     <div class="hero-content">
         <div class="hero-title">LOA</div>
         <div class="hero-sub">LOA - LOST OF ALL</div>
@@ -256,21 +266,21 @@
     <div class="gallery-slides" id="gallery-slides">
         <div class="gallery-slide" style="background-image:url('https://static.tildacdn.com/tild6533-6537-4531-a461-333766623465/photo_2026-02-18_11-.jpg')">
             <div class="gallery-slide-content">
-                <div class="gallery-slide-name">Худи "Loa"</div>
-                <div class="gallery-slide-price">5 000 р.</div>
+                <div class="gallery-slide-name">Футболка "Loa" WHITE</div>
+                <div class="gallery-slide-price">3 500 р.</div>
                 <button class="gallery-cart-btn" onclick="addToCart(2,'Худи Loa',5000)">В корзину</button>
             </div>
         </div>
         <div class="gallery-slide" style="background-image:url('https://static.tildacdn.com/tild3730-6434-4134-b064-316263353363/photo.jpg')">
             <div class="gallery-slide-content">
-                <div class="gallery-slide-name">Футболка "Loa" BLACK</div>
-                <div class="gallery-slide-price">3 500 р.</div>
+                <div class="gallery-slide-name">Худи "LOA"</div>
+                <div class="gallery-slide-price">5 000 р.</div>
                 <button class="gallery-cart-btn" onclick="addToCart(3,'Футболка Loa BLACK',3500)">В корзину</button>
             </div>
         </div>
         <div class="gallery-slide" style="background-image:url('https://static.tildacdn.com/tild3932-6465-4234-a164-383033353037/photo_2026-02-18_09-.jpg')">
             <div class="gallery-slide-content">
-                <div class="gallery-slide-name">Футболка "Loa" WHITE</div>
+                <div class="gallery-slide-name">Футболка "Loa" BLACK</div>
                 <div class="gallery-slide-price">3 500 р.</div>
                 <button class="gallery-cart-btn" onclick="addToCart(4,'Футболка Loa WHITE',3500)">В корзину</button>
             </div>
@@ -397,13 +407,13 @@ const PRODUCTS = {
          photos:['https://static.tildacdn.com/tild6165-3661-4435-b565-336238373737/photo.jpg','https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg'],
          desc:`<p><strong>Подвеска LOA — Chain</strong></p><p>Подвеска LOA — это финальный акцент дропа. Минимальный, но считываемый. Не про демонстрацию, а про принадлежность.</p><p>Буквы LOA выполнены в чёткой форме и зафиксированы на массивной цепи, создавая баланс между чистотой и весом. Подвеска ощущается как объект, а не украшение — она дополняет образ, не перетягивая внимание.</p><p>Работает как самостоятельный элемент и как продолжение философии дропа: тишина, утрата, контроль.</p><p>Подвеска производится под заказ.<br>Срок отправки — до 14 дней с момента оформления.</p>` },
     2: { id:2, name:'Худи "Loa"', price:5000, oldPrice:7000, hasSize:true,
-         photos:['https://static.tildacdn.com/tild6362-3038-4835-b031-313564643538/photo.jpg','https://static.tildacdn.com/tild6533-6537-4531-a461-333766623465/photo_2026-02-18_11-.jpg','https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg'],
+         photos:['https://static.tildacdn.com/tild6362-3038-4835-b031-313564643538/photo.jpg','https://i.imgur.com/R00rZyU.jpg','https://i.imgur.com/BeII4y1.jpg'],
          desc:`<p><strong>Худи LOA — Wings (Black)</strong></p><p>Худи Wings — центральный объект дропа. Про внутреннюю тяжесть и скрытую силу, про желание уйти и остаться одновременно.</p><p>Крылья на груди выполнены в мягком, матовом сером оттенке — без резких границ и лишней агрессии. Они не выглядят как декор, а как часть ткани и формы.</p><p>Плотный футер, свободная посадка и чистый крой делают худи максимально комфортным для повседневной носки, при этом сохраняя характер и глубину.</p><p>Худи производится под заказ.<br>Срок отправки — до 14 дней после оформления.</p>` },
     3: { id:3, name:'Футболка "Loa" BLACK', price:3500, oldPrice:5000, hasSize:true,
-         photos:['https://static.tildacdn.com/tild3666-3432-4666-b035-373633363835/noroot.png','https://static.tildacdn.com/tild3932-6465-4234-a164-383033353037/photo_2026-02-18_09-.jpg','https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg'],
+         photos:['https://static.tildacdn.com/tild3666-3432-4666-b035-373633363835/noroot.png','https://i.imgur.com/SOhZvD0.jpeg','https://i.imgur.com/wqEGG8Q.jpg'],
          desc:`<p><strong>Футболка LOA — Lost of All (Black)</strong></p><p>Футболка Lost of All — это состояние, а не фраза. Про момент, когда всё лишнее исчезает, и остаёшься только ты и тишина.</p><p>Минималистичный фронтальный принт выполнен в мягком, почти незаметном тоне — он читается только вблизи. На спине — крылья LOA, как символ утраты и одновременно внутренней свободы.</p><p>Свободный оверсайз-крой, плотный хлопок и чистые линии делают футболку базой, которая не устареет со временем.</p><p>Предзаказ: Изделие производится под заказ.<br>Срок отправки — до 14 дней после оформления.</p>` },
     4: { id:4, name:'Футболка "Loa" WHITE', price:3500, oldPrice:5000, hasSize:true,
-         photos:['https://static.tildacdn.com/tild3433-3837-4332-a638-303037303435/noroot.png','https://static.tildacdn.com/tild3730-6434-4134-b064-316263353363/photo.jpg','https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg'],
+         photos:['https://static.tildacdn.com/tild3433-3837-4332-a638-303037303435/noroot.png','https://i.imgur.com/dAAm0aq.jpg','https://i.imgur.com/imn539A.jpg'],
          desc:`<p><strong>Футболка LOA — Lost of All (White)</strong></p><p>Та же философия — чистый тон. Свободный оверсайз-крой, плотный хлопок.</p><p>Минималистичный принт спереди и крылья на спине. Футболка становится продолжением вашего внутреннего состояния.</p><p>Предзаказ: Изделие производится под заказ.<br>Срок отправки — до 14 дней после оформления.</p>` }
 };
 
@@ -447,9 +457,7 @@ let galIdx = 0;
 function goGallery(i) { galIdx = i; document.getElementById('gallery-slides').style.transform = `translateX(-${i*100}%)`; document.querySelectorAll('.gallery-dot').forEach((d,j)=>d.classList.toggle('active',j===i)); }
 setInterval(() => goGallery((galIdx+1)%3), 4800);
 
-// HERO
-let heroBg = 1;
-setInterval(() => { heroBg = heroBg === 1 ? 2 : 1; document.getElementById('hero-bg-1').style.opacity = heroBg === 1 ? '1' : '0'; document.getElementById('hero-bg-2').style.opacity = heroBg === 2 ? '1' : '0'; }, 4200);
+
 
 // ОВЕРЛЕЙ ТОВАРА
 let curP = null, curPhotoIdx = 0;
@@ -869,11 +877,11 @@ function renderNavProfile() {
     if(currentUser) {
         dd.innerHTML = `<div style="padding:15px; border-bottom:1px solid #333;">${currentUser.name}</div><div style="padding:15px; cursor:pointer;" onclick="openAccount()">👤 Кабинет</div><div style="padding:15px; cursor:pointer; color:red;" onclick="doLogout()">🚪 Выход</div>`;
     } else {
-        dd.innerHTML = `<div style="padding:15px; cursor:pointer;" onclick="openAuth()">👤 Войти</div><div style="padding:15px; cursor:pointer;" onclick="showReg()">✨ Регистрация</div>`;
+       dd.innerHTML = `<div style="padding:15px; cursor:pointer;" onclick="openAuth()">👤 Войти</div><div style="padding:15px; cursor:pointer;" onclick="openAuth(); showReg()">✨ Регистрация</div>`;
     }
 }
 function toggleProfileDropdown() { const dd = document.getElementById('profile-dropdown'); dd.style.display = dd.style.display === 'block' ? 'none' : 'block'; }
-function openAuth() { document.getElementById('auth-overlay').classList.add('open'); }
+function openAuth() { document.getElementById('auth-overlay').classList.add('open'); showLogin(); }
 function closeAuth() { document.getElementById('auth-overlay').classList.remove('open'); }
 function showReg() { document.getElementById('auth-login-view').style.display='none'; document.getElementById('auth-reg-view').style.display='block'; }
 function showLogin() { document.getElementById('auth-login-view').style.display='block'; document.getElementById('auth-reg-view').style.display='none'; }
@@ -1009,6 +1017,49 @@ updateWishUI();
     <div style="margin-top:28px;text-align:center;">
       <button onclick="document.getElementById('modal-terms').style.display='none'" style="background:#000;color:#fff;border:none;border-radius:50px;padding:13px 36px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Закрыть</button>
     </div>
+  </div>
+</div>
+<!-- Доставка и оплата -->
+<div id="modal-delivery" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.5); overflow-y:auto; padding:30px 16px;">
+  <div style="background:#fff; max-width:720px; margin:0 auto; border-radius:12px; padding:40px 36px; position:relative; font-family:'Unbounded',sans-serif; font-size:14px; line-height:1.75; color:#222;">
+    <button onclick="document.getElementById('modal-delivery').style.display='none'" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:26px;cursor:pointer;color:#aaa;">×</button>
+    <h2 style="font-size:20px;font-weight:800;margin:0 0 24px;">Доставка и оплата</h2>
+    <p style="margin-bottom:16px;">Оформляя заказ на сайте, Покупатель подтверждает согласие с условиями продажи товаров.</p>
+    <h3 style="font-size:14px;font-weight:700;margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;">Доставка</h3>
+    <p>— Отправка заказов осуществляется в течение 7–14 рабочих дней с момента оплаты<br>— Доставка осуществляется по территории Российской Федерации и странам СНГ<br>— Срок доставки зависит от региона и составляет от 3 до 10 рабочих дней<br>— После отправки Покупателю предоставляется трек-номер для отслеживания</p>
+    <h3 style="font-size:14px;font-weight:700;margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;">Оплата</h3>
+    <p>— Оплата производится онлайн с использованием банковских карт<br>— Все платежи обрабатываются через защищённые платёжные системы<br>— Моментом оплаты считается подтверждение успешной транзакции</p>
+    <h3 style="font-size:14px;font-weight:700;margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;">Важно</h3>
+    <p>— Товар подлежит проверке перед отправкой<br>— Внешний вид и характеристики товара могут незначительно отличаться от изображений на сайте<br>— Обязанность по передаче товара считается исполненной с момента передачи товара в службу доставки</p>
+    <div style="margin-top:28px;text-align:center;"><button onclick="document.getElementById('modal-delivery').style.display='none'" style="background:#000;color:#fff;border:none;border-radius:50px;padding:13px 36px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Unbounded',sans-serif;">Закрыть</button></div>
+  </div>
+</div>
+
+<!-- О нас -->
+<div id="modal-about" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.5); overflow-y:auto; padding:30px 16px;">
+  <div style="background:#fff; max-width:720px; margin:0 auto; border-radius:12px; padding:40px 36px; position:relative; font-family:'Unbounded',sans-serif; font-size:14px; line-height:1.75; color:#222;">
+    <button onclick="document.getElementById('modal-about').style.display='none'" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:26px;cursor:pointer;color:#aaa;">×</button>
+    <h2 style="font-size:20px;font-weight:800;margin:0 0 24px;">О нас</h2>
+    <p style="margin-bottom:16px;">LOA — интернет-магазин одежды, ориентированный на подбор актуальных моделей в минималистичном стиле.</p>
+    <p style="margin-bottom:16px;">Мы предлагаем товары, соответствующие заявленным характеристикам, уделяя внимание качеству, внешнему виду и актуальности ассортимента.</p>
+    <p style="margin-bottom:16px;">Вся информация, размещённая на сайте, носит справочный характер и направлена на ознакомление Покупателя с ассортиментом, характеристиками и условиями приобретения товаров.</p>
+    <p style="margin-bottom:16px;">Оформляя заказ на сайте, Покупатель подтверждает, что ознакомился с условиями продажи товаров, размещёнными в публичной оферте, и принимает их.</p>
+    <p>Мы стремимся обеспечить прозрачные условия покупки и надлежащий уровень сервиса на всех этапах взаимодействия.</p>
+    <div style="margin-top:28px;text-align:center;"><button onclick="document.getElementById('modal-about').style.display='none'" style="background:#000;color:#fff;border:none;border-radius:50px;padding:13px 36px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Unbounded',sans-serif;">Закрыть</button></div>
+  </div>
+</div>
+
+<!-- Отзывы -->
+<div id="modal-reviews" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.5); overflow-y:auto; padding:30px 16px;">
+  <div style="background:#fff; max-width:720px; margin:0 auto; border-radius:12px; padding:40px 36px; position:relative; font-family:'Unbounded',sans-serif; font-size:14px; line-height:1.75; color:#222;">
+    <button onclick="document.getElementById('modal-reviews').style.display='none'" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:26px;cursor:pointer;color:#aaa;">×</button>
+    <h2 style="font-size:20px;font-weight:800;margin:0 0 24px;">Отзывы</h2>
+    <p style="margin-bottom:20px;">Отзывы, размещённые на сайте, отражают субъективное мнение покупателей о приобретённых товарах.</p>
+    <div style="background:#f9f9f9;border-radius:12px;padding:16px 20px;margin-bottom:12px;">💬 «Качество соответствует ожиданиям»</div>
+    <div style="background:#f9f9f9;border-radius:12px;padding:16px 20px;margin-bottom:12px;">💬 «Быстрая доставка, всё пришло вовремя»</div>
+    <div style="background:#f9f9f9;border-radius:12px;padding:16px 20px;margin-bottom:20px;">💬 «Товар соответствует описанию»</div>
+    <p style="color:#aaa;font-size:12px;">Обращаем внимание, что индивидуальные впечатления могут отличаться. Для получения дополнительной информации о товаре вы можете обратиться к нам перед оформлением заказа.</p>
+    <div style="margin-top:28px;text-align:center;"><button onclick="document.getElementById('modal-reviews').style.display='none'" style="background:#000;color:#fff;border:none;border-radius:50px;padding:13px 36px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Unbounded',sans-serif;">Закрыть</button></div>
   </div>
 </div>
 
