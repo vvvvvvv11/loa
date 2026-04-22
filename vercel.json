@@ -5,7 +5,7 @@
     { "src": "index.html", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/api/telegram", "dest": "/api/telegram.js" },
+    { "src": "/api/telegram", "methods": ["GET", "POST"], "dest": "/api/telegram.js" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
