@@ -45,6 +45,8 @@ async function updateOrderStatus(docId, statusKey) {
 }
 
 module.exports = async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
   if (req.method !== 'POST') return res.status(200).json({ ok: true });
 
   try {
