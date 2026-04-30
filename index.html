@@ -605,7 +605,13 @@ function submitOrder() {
     const phone = document.getElementById('order-phone').value.trim();
     const tg = document.getElementById('order-tg').value.trim();
     if (!name || !phone) return alert('Заполните имя и телефон');
-    if (!selectedPvz) return alert('Выберите пункт выдачи');
+    
+    // ПОЛУЧАЕМ ВЫБРАННЫЙ ПВЗ ИЗ ГЛОБАЛЬНОЙ ПЕРЕМЕННОЙ
+    const selectedPvz = window.selectedPvz;
+    if (!selectedPvz) {
+        alert('Выберите пункт выдачи');
+        return;
+    }
 
     const items = cart.map(i => i.name).join(', ');
     const total = cart.reduce((s,i) => s+i.price, 0);
@@ -1120,6 +1126,7 @@ updateWishUI();
                     document.querySelectorAll('#pvz-list > div').forEach(el => el.style.background = '');
                     item.style.background = '#e6f0ff';
                     selectedPvzObj = pvz;
+                    window.selectedPvz = selectedPvzObj;   // 
                     selectedText.textContent = pvz.address;
                     selectedBlock.style.display = 'block';
                     if (submitBtn) {
