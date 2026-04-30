@@ -625,7 +625,7 @@ function submitOrder() {
             tg: tg,
             items: items,
             total: total + ' р.',
-            pvz: selectedPvz.addr,
+            pvz: selectedPvz.address || selectedPvz.addr,
             date: date,
             status: 'new'
         }).then(docRef => {
@@ -637,7 +637,7 @@ function submitOrder() {
                 (tg ? `✈️ <b>Telegram:</b> ${tg}\n` : '') +
                 `\n📦 <b>Товары:</b>\n${cart.map(i => '• ' + i.name + ' — ' + i.price.toLocaleString('ru') + ' р.').join('\n')}\n` +
                 `💰 <b>Итого:</b> ${total.toLocaleString('ru')} р.\n\n` +
-                `🚚 <b>ПВЗ:</b> ${selectedPvz.addr}\n` +
+                `🚚 <b>ПВЗ:</b> ${selectedPvz.address || selectedPvz.addr}\n` +
                 (selectedPvz.hours ? `🕐 <b>Часы работы:</b> ${selectedPvz.hours}\n` : '') +
                 `📅 <b>Дата:</b> ${date}\n\n` +
                 `━━━━━━━━━━━━━━━━━━\n` +
