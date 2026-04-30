@@ -1063,7 +1063,7 @@ updateWishUI();
             
             try {
                 // Загружаем JSON-файл
-                const response = await fetch('/pvz.json');
+                const response = await fetch('/public/pvz.json');
                 const allData = await response.json();
                 
                 // Ищем город (регистронезависимо)
