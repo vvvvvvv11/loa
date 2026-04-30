@@ -1030,12 +1030,13 @@ updateWishUI();
 </div>
 
 <script>
-<script>
 // ============================================================
 // ПВЗ ПОИСК — РАБОЧАЯ ВЕРСИЯ
 // ============================================================
 (function() {
     function initPvzSearch() {
+        console.log('initPvzSearch запущен');
+        
         const cityInput = document.getElementById('pvz-city-search');
         const searchBtn = document.getElementById('pvz-search-btn');
         const statusDiv = document.getElementById('pvz-status');
@@ -1044,7 +1045,10 @@ updateWishUI();
         const selectedText = document.getElementById('selected-pvz-text');
         const submitBtn = document.getElementById('submit-order-btn');
 
-        if (!cityInput || !searchBtn) return;
+        if (!cityInput || !searchBtn) {
+            console.error('Не найдены элементы:', {cityInput, searchBtn});
+            return;
+        }
 
         let selectedPvzObj = null;
         let pvzData = null;
@@ -1066,6 +1070,8 @@ updateWishUI();
         }
 
         async function searchPvz(cityName) {
+            console.log('searchPvz вызван, город:', cityName);
+            
             if (!cityName.trim()) {
                 statusDiv.innerHTML = '⚠ Введите название города';
                 listDiv.innerHTML = '';
@@ -1100,7 +1106,7 @@ updateWishUI();
             statusDiv.innerHTML = `✅ Найдено ${pvzArray.length} пунктов выдачи в городе «${foundCityKey}»:`;
             
             listDiv.innerHTML = '';
-            pvzArray.forEach((pvz) => {
+            pvzArray.slice(0, 20).forEach((pvz) => {
                 const item = document.createElement('div');
                 item.style.cssText = 'padding:12px 0; border-bottom:1px solid #f0f0f0; cursor:pointer; transition:background 0.15s;';
                 item.onmouseover = () => item.style.background = '#f9f9f9';
@@ -1116,11 +1122,19 @@ updateWishUI();
                     selectedPvzObj = pvz;
                     selectedText.textContent = pvz.address;
                     selectedBlock.style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                    }
                 };
                 listDiv.appendChild(item);
             });
+            
+            if (pvzArray.length > 20) {
+                const more = document.createElement('div');
+                more.style.cssText = 'padding:12px; text-align:center; color:#888; font-size:12px;';
+                more.innerHTML = `И еще ${pvzArray.length - 20} адресов...`;
+                listDiv.appendChild(more);
+            }
         }
         
         searchBtn.addEventListener('click', () => searchPvz(cityInput.value));
@@ -1153,6 +1167,5 @@ updateWishUI();
     }
 })();
 </script>
-
 </body>
 </html>
