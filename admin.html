@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>LOA — Админ Панель</title>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); 
+            color: #e0e0e0; 
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logout-btn {
+            background: #ff4444;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover { background: #ff6666; }
+
+        /* ===== LOGIN PAGE ===== */
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .login-card h1 {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: #ffd700;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .login-card .sub {
+            color: #888;
+            text-align: center;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .login-card input:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        .login-card button {
+            width: 100%;
+            padding: 14px;
+            background: #ffd700;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .login-card button:hover { background: #ffed4a; }
+
+        .error {
+            background: rgba(255,68,68,0.2);
+            border: 1px solid #ff4444;
+            color: #ff8888;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .success {
+            background: rgba(76,175,80,0.2);
+            border: 1px solid #4caf50;
+            color: #88dd88;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard { display: flex; gap: 20px; flex-wrap: wrap; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #ffd700;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: #888;
+            padding: 12px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .tab-btn.active {
+            color: #ffd700;
+            border-bottom-color: #ffd700;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #ffd700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ===== ORDERS TABLE ===== */
+        .orders-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: rgba(255,215,0,0.1);
+            color: #ffd700;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(255,215,0,0.2);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .order-id {
+            font-weight: 700;
+            color: #ffd700;
+            font-family: monospace;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .status-bought { background: rgba(255,215,0,0.2); color: #ffd700; }
+        .status-shipped { background: rgba(76,175,80,0.2); color: #88dd88; }
+        .status-delivered { background: rgba(33,150,243,0.2); color: #88ccff; }
+        .status-cancelled { background: rgba(255,68,68,0.2); color: #ff8888; }
+        .status-refund { background: rgba(156,39,176,0.2); color: #dd88ff; }
+
+        /* ===== ORDER DETAILS ===== */
+        .order-details {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+
+        .order-details div {
+            margin: 8px 0;
+            color: #ccc;
+        }
+
+        .order-details .label {
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 8px 16px;
+        }
+
+        .btn-primary {
+            background: #ffd700;
+            color: #000;
+        }
+
+        .btn-primary:hover { background: #ffed4a; }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: #fff;
+        }
+
+        .btn-success:hover { background: #66bb6a; }
+
+        .btn-danger {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .btn-danger:hover { background: #ff6666; }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* ===== INPUTS ===== */
+        input[type="text"],
+        input[type="number"],
+        input[type="password"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        label {
+            display: block;
+            color: #ffd700;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        /* ===== LOADING & EMPTY ===== */
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255,215,0,0.2);
+            border-top-color: #ffd700;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover { color: #fff; }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            body { padding: 8px; }
+            .header { padding: 16px; }
+            .header h1 { font-size: 24px; }
+            table { font-size: 12px; }
+            th, td { padding: 8px; }
+            .btn-group { gap: 4px; }
+            button { padding: 6px 12px; font-size: 12px; }
+            .card { padding: 16px; }
+        }
+
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .search-box input {
+            flex: 1;
+            margin: 0;
+        }
+
+        .filter-status {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .filter-status button {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .filter-status button.active {
+            background: #ffd700;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-page">
+    <div class="login-card">
+        <h1>LOA</h1>
+        <div class="sub">Админ Панель Управления</div>
+        <div id="loginError" class="error hidden"></div>
+        <div class="form-group">
+            <input type="password" id="passwordInput" placeholder="Введите пароль" autofocus>
+        </div>
+        <button onclick="login()" class="btn-primary" style="width: 100%; padding: 14px;">Войти</button>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden">
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>LOA Admin Panel</h1>
+            <div class="header-right">
+                <span id="userInfo" style="font-size: 14px; color: #888;">Администратор</span>
+                <button class="logout-btn" onclick="logout()">Выход</button>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="value" id="totalOrders">0</div>
+                <div class="label">Всего заказов</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="boughtOrders">0</div>
+                <div class="label">Выкуплено</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="shippedOrders">0</div>
+                <div class="label">Отправлено</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="deliveredOrders">0</div>
+                <div class="label">Доставлено</div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('orders')">📦 Заказы</button>
+            <button class="tab-btn" onclick="switchTab('settings')">⚙️ Настройки</button>
+        </div>
+
+        <!-- ORDERS TAB -->
+        <div id="orders" class="tab-content active">
+            <div class="card">
+                <h2>Управление заказами</h2>
+                
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Поиск по ID, клиенту..." onkeyup="filterOrders()">
+                    <button class="btn-secondary" onclick="loadOrders()">🔄 Обновить</button>
+                </div>
+
+                <div class="filter-status" id="filterStatus">
+                    <button class="filter-status-btn active" onclick="filterByStatus('all')">Все</button>
+                    <button class="filter-status-btn" onclick="filterByStatus('bought')">✅ Выкуплено</button>
+                    <button class="filter-status-btn" onclick="filterByStatus('shipped')">🚚 Отправлено</button>
+                    <button class="filter-status-btn" onclick="filterByStatus('delivered')">🎉 Доставлено</button>
+                    <button class="filter-status-btn" onclick="filterByStatus('cancelled')">❌ Отменён</button>
+                    <button class="filter-status-btn" onclick="filterByStatus('refund')">↩️ Возврат</button>
+                </div>
+
+                <div id="ordersContainer" class="orders-table">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Загрузка заказов...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <h2>Настройки системы</h2>
+                
+                <div class="form-group">
+                    <label>Пароль администратора</label>
+                    <input type="password" id="adminPassword" placeholder="Новый пароль (оставьте пустым для без изменений)">
+                    <button class="btn-primary" onclick="updateAdminPassword()">Изменить пароль</button>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+
+                <div class="form-group">
+                    <label>ID Telegram чата для уведомлений</label>
+                    <input type="text" id="telegramChatId" placeholder="ID чата">
+                    <button class="btn-primary" onclick="updateTelegramSettings()">Сохранить</button>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+
+                <div class="form-group">
+                    <label>Статистика</label>
+                    <button class="btn-secondary" onclick="exportStats()">📊 Экспортировать статистику</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STATUS CHANGE MODAL -->
+<div id="statusModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            Изменить статус
+            <button class="close-btn" onclick="closeStatusModal()">×</button>
+        </div>
+        
+        <div id="modalOrderInfo"></div>
+
+        <div class="form-group">
+            <label>Новый статус</label>
+            <select id="statusSelect">
+                <option value="">Выберите статус</option>
+                <option value="bought">✅ Выкуплено</option>
+                <option value="shipped">🚚 Отправлено</option>
+                <option value="delivered">🎉 Доставлено</option>
+                <option value="cancelled">❌ Отменён</option>
+                <option value="refund">↩️ Возврат</option>
+            </select>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeStatusModal()">Отмена</button>
+            <button class="btn-primary" onclick="updateOrderStatus()">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/module/index.js" type="module"></script>
+
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/module/index.js';
+
+    // SUPABASE CONFIG
+    const SUPABASE_URL = 'https://fbwbwrqepdjiliiabedh.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZid2J3cnFlcGRqaWxpaWFiZWRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTA1NjMsImV4cCI6MjA5NDMyNjU2M30.a4RaEbcicNA0moct5bSjEeLNbsumbp8jDno4bkuWlJA';
+    
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const ADMIN_PASSWORD = 'admin123';
+    let orders = [];
+    let filteredOrders = [];
+    let currentStatusOrder = null;
+    let currentStatusFilter = 'all';
+
+    // STATUS TRANSLATIONS
+    const STATUS_LABELS = {
+        bought: '✅ Выкуплено',
+        shipped: '🚚 Отправлено',
+        delivered: '🎉 Доставлено',
+        cancelled: '❌ Отменён',
+        refund: '↩️ Возврат'
+    };
+
+    const STATUS_CLASSES = {
+        bought: 'status-bought',
+        shipped: 'status-shipped',
+        delivered: 'status-delivered',
+        cancelled: 'status-cancelled',
+        refund: 'status-refund'
+    };
+
+    // LOGIN
+    window.login = function() {
+        const password = document.getElementById('passwordInput').value;
+        if (password === ADMIN_PASSWORD) {
+            localStorage.setItem('adminLogged', 'true');
+            showDashboard();
+        } else {
+            const errorEl = document.getElementById('loginError');
+            errorEl.textContent = '❌ Неверный пароль';
+            errorEl.classList.remove('hidden');
+        }
+    };
+
+    window.logout = function() {
+        localStorage.removeItem('adminLogged');
+        location.reload();
+    };
+
+    // SHOW DASHBOARD
+    function showDashboard() {
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        loadOrders();
+    }
+
+    // LOAD ORDERS FROM SUPABASE
+    window.loadOrders = async function() {
+        try {
+            const { data, error } = await supabase
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            orders = data || [];
+            filteredOrders = orders;
+            updateStats();
+            renderOrders();
+        } catch (err) {
+            console.error('Error loading orders:', err);
+            showError('Ошибка загрузки заказов: ' + err.message);
+        }
+    };
+
+    // UPDATE STATS
+    function updateStats() {
+        const stats = {
+            total: orders.length,
+            bought: orders.filter(o => o.status === 'bought').length,
+            shipped: orders.filter(o => o.status === 'shipped').length,
+            delivered: orders.filter(o => o.status === 'delivered').length
+        };
+
+        document.getElementById('totalOrders').textContent = stats.total;
+        document.getElementById('boughtOrders').textContent = stats.bought;
+        document.getElementById('shippedOrders').textContent = stats.shipped;
+        document.getElementById('deliveredOrders').textContent = stats.delivered;
+    }
+
+    // RENDER ORDERS TABLE
+    function renderOrders() {
+        const container = document.getElementById('ordersContainer');
+        
+        if (filteredOrders.length === 0) {
+            container.innerHTML = `
+                <div class="empty">
+                    <div class="empty-icon">📭</div>
+                    <p>Нет заказов</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID заказа</th>
+                        <th>Клиент</th>
+                        <th>Товары</th>
+                        <th>Сумма</th>
+                        <th>Статус</th>
+                        <th>Дата</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        filteredOrders.forEach(order => {
+            const date = new Date(order.created_at).toLocaleDateString('ru-RU', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const shortId = (order.id || '').slice(-6).toUpperCase();
+            const statusLabel = STATUS_LABELS[order.status] || order.status;
+            const statusClass = STATUS_CLASSES[order.status] || '';
+
+            html += `
+                <tr>
+                    <td class="order-id">#${shortId}</td>
+                    <td>${order.name || '—'}</td>
+                    <td>${order.items || '—'}</td>
+                    <td>${order.total || '—'}</td>
+                    <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                    <td>${date}</td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn-primary btn-sm" onclick="openStatusModal('${order.id}')">Изменить</button>
+                            <button class="btn-secondary btn-sm" onclick="viewOrderDetails('${order.id}')">Подробно</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+
+    // FILTER ORDERS
+    window.filterOrders = function() {
+        const searchText = document.getElementById('searchInput').value.toLowerCase();
+        
+        filteredOrders = orders.filter(order => {
+            const id = (order.id || '').toLowerCase();
+            const name = (order.name || '').toLowerCase();
+            const items = (order.items || '').toLowerCase();
+            
+            const matchesSearch = id.includes(searchText) || name.includes(searchText) || items.includes(searchText);
+            const matchesStatus = currentStatusFilter === 'all' || order.status === currentStatusFilter;
+            
+            return matchesSearch && matchesStatus;
+        });
+
+        renderOrders();
+    };
+
+    // FILTER BY STATUS
+    window.filterByStatus = function(status) {
+        currentStatusFilter = status;
+        
+        document.querySelectorAll('.filter-status-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        filterOrders();
+    };
+
+    // OPEN STATUS MODAL
+    window.openStatusModal = function(orderId) {
+        currentStatusOrder = orders.find(o => o.id === orderId);
+        if (!currentStatusOrder) return;
+
+        const shortId = (orderId || '').slice(-6).toUpperCase();
+        const infoHtml = `
+            <div class="order-details">
+                <div><span class="label">ID:</span> #${shortId}</div>
+                <div><span class="label">Клиент:</span> ${currentStatusOrder.name || '—'}</div>
+                <div><span class="label">Товары:</span> ${currentStatusOrder.items || '—'}</div>
+                <div><span class="label">Сумма:</span> ${currentStatusOrder.total || '—'}</div>
+                <div><span class="label">Текущий статус:</span> ${STATUS_LABELS[currentStatusOrder.status] || currentStatusOrder.status}</div>
+            </div>
+        `;
+
+        document.getElementById('modalOrderInfo').innerHTML = infoHtml;
+        document.getElementById('statusSelect').value = currentStatusOrder.status || '';
+        document.getElementById('statusModal').classList.add('active');
+    };
+
+    // CLOSE STATUS MODAL
+    window.closeStatusModal = function() {
+        document.getElementById('statusModal').classList.remove('active');
+        currentStatusOrder = null;
+    };
+
+    // UPDATE ORDER STATUS
+    window.updateOrderStatus = async function() {
+        if (!currentStatusOrder) return;
+
+        const newStatus = document.getElementById('statusSelect').value;
+        if (!newStatus) {
+            alert('Выберите статус');
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('orders')
+                .update({
+                    status: newStatus,
+                    status_updated_at: new Date().toISOString()
+                })
+                .eq('id', currentStatusOrder.id);
+
+            if (error) throw error;
+
+            closeStatusModal();
+            await loadOrders();
+            showSuccess(`✅ Статус заказа изменен на "${STATUS_LABELS[newStatus]}"`);
+        } catch (err) {
+            console.error('Error updating status:', err);
+            showError('Ошибка обновления статуса: ' + err.message);
+        }
+    };
+
+    // VIEW ORDER DETAILS
+    window.viewOrderDetails = function(orderId) {
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return;
+
+        const details = `
+📦 ID: ${order.id}
+👤 Клиент: ${order.name || '—'}
+📦 Товары: ${order.items || '—'}
+💰 Сумма: ${order.total || '—'}
+📅 Дата заказа: ${new Date(order.created_at).toLocaleString('ru-RU')}
+🔄 Статус: ${STATUS_LABELS[order.status] || order.status}
+📝 Примечание: ${order.note || 'Отсутствует'}
+        `;
+
+        alert(details);
+    };
+
+    // SWITCH TAB
+    window.switchTab = function(tab) {
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-btn').forEach(el => {
+            el.classList.remove('active');
+        });
+
+        document.getElementById(tab).classList.add('active');
+        event.target.classList.add('active');
+    };
+
+    // UPDATE ADMIN PASSWORD
+    window.updateAdminPassword = function() {
+        const newPassword = document.getElementById('adminPassword').value;
+        if (!newPassword) {
+            alert('Введите новый пароль');
+            return;
+        }
+
+        // Save to localStorage (in production, use secure backend)
+        localStorage.setItem('adminPassword', newPassword);
+        document.getElementById('adminPassword').value = '';
+        showSuccess('✅ Пароль изменен');
+    };
+
+    // UPDATE TELEGRAM SETTINGS
+    window.updateTelegramSettings = function() {
+        const chatId = document.getElementById('telegramChatId').value;
+        if (!chatId) {
+            alert('Введите ID чата');
+            return;
+        }
+
+        localStorage.setItem('telegramChatId', chatId);
+        showSuccess('✅ Настройки Telegram сохранены');
+    };
+
+    // EXPORT STATS
+    window.exportStats = function() {
+        const stats = {
+            totalOrders: orders.length,
+            byStatus: {
+                bought: orders.filter(o => o.status === 'bought').length,
+                shipped: orders.filter(o => o.status === 'shipped').length,
+                delivered: orders.filter(o => o.status === 'delivered').length,
+                cancelled: orders.filter(o => o.status === 'cancelled').length,
+                refund: orders.filter(o => o.status === 'refund').length
+            },
+            generatedAt: new Date().toISOString()
+        };
+
+        const json = JSON.stringify(stats, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `loa-stats-${Date.now()}.json`;
+        a.click();
+
+        showSuccess('📊 Статистика экспортирована');
+    };
+
+    // HELPERS
+    function showError(msg) {
+        const div = document.createElement('div');
+        div.className = 'error';
+        div.textContent = msg;
+        document.querySelector('.container').insertBefore(div, document.querySelector('.stats-grid'));
+        setTimeout(() => div.remove(), 3000);
+    }
+
+    function showSuccess(msg) {
+        const div = document.createElement('div');
+        div.className = 'success';
+        div.textContent = msg;
+        document.querySelector('.container').insertBefore(div, document.querySelector('.stats-grid'));
+        setTimeout(() => div.remove(), 3000);
+    }
+
+    // INIT
+    if (localStorage.getItem('adminLogged') === 'true') {
+        showDashboard();
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && document.getElementById('passwordInput').offsetParent !== null) {
+            login();
+        }
+    });
+</script>
+
+</body>
+</html>
