@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>LOA — Админ Панель</title>
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- SUPABASE SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -236,8 +240,8 @@
             align-items: center;
         }
 
-        /* ===== ORDERS TABLE ===== */
-        .orders-table {
+        /* ===== TABLES ===== */
+        .table-responsive {
             width: 100%;
             overflow-x: auto;
         }
@@ -262,245 +266,53 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        tr:hover {
-            background: rgba(255,255,255,0.03);
-        }
-
-        .order-id {
-            font-weight: 700;
-            color: #ffd700;
-            font-family: monospace;
-        }
+        tr:hover { background: rgba(255,255,255,0.03); }
 
         .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
             font-weight: 600;
             font-size: 12px;
-            text-align: center;
         }
 
-        .status-bought { background: rgba(255,215,0,0.2); color: #ffd700; }
-        .status-shipped { background: rgba(76,175,80,0.2); color: #88dd88; }
-        .status-delivered { background: rgba(33,150,243,0.2); color: #88ccff; }
-        .status-cancelled { background: rgba(255,68,68,0.2); color: #ff8888; }
-        .status-refund { background: rgba(156,39,176,0.2); color: #dd88ff; }
+        .status-bought { background: rgba(33,150,243,0.2); color: #64b5f6; }
+        .status-shipped { background: rgba(255,152,0,0.2); color: #ffb74d; }
+        .status-delivered { background: rgba(76,175,80,0.2); color: #81c784; }
+        .status-cancelled { background: rgba(244,67,54,0.2); color: #ef5350; }
+        .status-refund { background: rgba(156,39,176,0.2); color: #ce93d8; }
 
-        /* ===== ORDER DETAILS ===== */
-        .order-details {
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 12px;
-            font-size: 13px;
-        }
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-primary { background: #ffd700; color: #000; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; }
+        .btn-primary:hover { background: #ffed4a; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+        .btn-danger { background: #ff4444; color: #fff; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; }
+        .btn-danger:hover { background: #ff6666; }
+        .btn-sm { padding: 6px 12px; font-size: 11px; }
 
-        .order-details div {
-            margin: 8px 0;
-            color: #ccc;
-        }
-
-        .order-details .label {
-            color: #ffd700;
-            font-weight: 600;
-        }
-
-        /* ===== BUTTONS ===== */
-        .btn-group {
+        .filter-btn-group {
             display: flex;
             gap: 8px;
+            margin-bottom: 16px;
             flex-wrap: wrap;
         }
 
-        button {
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            font-size: 13px;
-            padding: 8px 16px;
-        }
-
-        .btn-primary {
-            background: #ffd700;
-            color: #000;
-        }
-
-        .btn-primary:hover { background: #ffed4a; }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.15);
-            border-color: rgba(255,255,255,0.3);
-        }
-
-        .btn-success {
-            background: #4caf50;
-            color: #fff;
-        }
-
-        .btn-success:hover { background: #66bb6a; }
-
-        .btn-danger {
-            background: #ff4444;
-            color: #fff;
-        }
-
-        .btn-danger:hover { background: #ff6666; }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-
-        /* ===== INPUTS ===== */
-        input[type="text"],
-        input[type="number"],
-        input[type="password"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 10px 12px;
+        .filter-status-btn {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            margin-bottom: 12px;
-            transition: border-color 0.2s;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #ffd700;
-        }
-
-        label {
-            display: block;
-            color: #ffd700;
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 13px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        /* ===== LOADING & EMPTY ===== */
-        .loading {
-            text-align: center;
-            padding: 40px 20px;
             color: #888;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid rgba(255,215,0,0.2);
-            border-top-color: #ffd700;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .empty {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        /* ===== MODAL ===== */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
-            z-index: 5000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: #1a1a2e;
-            border-radius: 16px;
-            padding: 24px;
-            width: 100%;
-            max-width: 500px;
-            border: 1px solid rgba(255,255,255,0.1);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            font-size: 18px;
-            font-weight: 700;
-            color: #ffd700;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 24px;
+            padding: 8px 16px;
+            border-radius: 20px;
             cursor: pointer;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
         }
 
-        .close-btn:hover { color: #fff; }
-
-        .modal-footer {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-            justify-content: flex-end;
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            body { padding: 8px; }
-            .header { padding: 16px; }
-            .header h1 { font-size: 24px; }
-            table { font-size: 12px; }
-            th, td { padding: 8px; }
-            .btn-group { gap: 4px; }
-            button { padding: 6px 12px; font-size: 12px; }
-            .card { padding: 16px; }
+        .filter-status-btn.active {
+            background: #ffd700;
+            color: #000;
+            border-color: #ffd700;
         }
 
         .search-box {
@@ -511,190 +323,374 @@
 
         .search-box input {
             flex: 1;
-            margin: 0;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
         }
 
-        .filter-status {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
+        .search-box input:focus {
+            outline: none;
+            border-color: #ffd700;
         }
 
-        .filter-status button {
-            padding: 8px 16px;
-            font-size: 13px;
+        /* ===== FORM ===== */
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        .filter-status button.active {
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-submit {
             background: #ffd700;
             color: #000;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover { background: #ffed4a; }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffd700;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-close:hover { color: #fff; }
+
+        .order-details, .product-details {
+            background: rgba(255,255,255,0.02);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .order-details div, .product-details div {
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .order-details .label, .product-details .label {
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; }
+            .header h1 { font-size: 20px; }
+            table { font-size: 12px; }
+            th, td { padding: 8px; }
+            .btn-group { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-<!-- LOGIN PAGE -->
-<div id="loginPage" class="login-page">
-    <div class="login-card">
-        <h1>LOA</h1>
-        <div class="sub">Админ Панель Управления</div>
-        <div id="loginError" class="error hidden"></div>
-        <div class="form-group">
-            <input type="password" id="passwordInput" placeholder="Введите пароль" autofocus>
+<div class="container">
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="login-page">
+        <div class="login-card">
+            <h1>LOA</h1>
+            <p class="sub">Админ Панель</p>
+            <div id="loginMessage"></div>
+            <input 
+                type="password" 
+                id="passwordInput" 
+                placeholder="Введите пароль"
+                autocomplete="current-password"
+            >
+            <button onclick="login()">Войти</button>
         </div>
-        <button onclick="login()" class="btn-primary" style="width: 100%; padding: 14px;">Войти</button>
     </div>
-</div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="hidden">
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <h1>LOA Admin Panel</h1>
-            <div class="header-right">
-                <span id="userInfo" style="font-size: 14px; color: #888;">Администратор</span>
-                <button class="logout-btn" onclick="logout()">Выход</button>
-            </div>
-        </div>
-
-        <!-- STATS -->
-        <div class="stats-grid" id="statsGrid">
-            <div class="stat-card">
-                <div class="value" id="totalOrders">0</div>
-                <div class="label">Всего заказов</div>
-            </div>
-            <div class="stat-card">
-                <div class="value" id="boughtOrders">0</div>
-                <div class="label">Выкуплено</div>
-            </div>
-            <div class="stat-card">
-                <div class="value" id="shippedOrders">0</div>
-                <div class="label">Отправлено</div>
-            </div>
-            <div class="stat-card">
-                <div class="value" id="deliveredOrders">0</div>
-                <div class="label">Доставлено</div>
-            </div>
-        </div>
-
-        <!-- TABS -->
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('orders')">📦 Заказы</button>
-            <button class="tab-btn" onclick="switchTab('settings')">⚙️ Настройки</button>
-        </div>
-
-        <!-- ORDERS TAB -->
-        <div id="orders" class="tab-content active">
-            <div class="card">
-                <h2>Управление заказами</h2>
-                
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Поиск по ID, клиенту..." onkeyup="filterOrders()">
-                    <button class="btn-secondary" onclick="loadOrders()">🔄 Обновить</button>
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="dashboard hidden">
+        <div style="width: 100%;">
+            <!-- HEADER -->
+            <div class="header">
+                <h1>LOA — Админ Панель</h1>
+                <div class="header-right">
+                    <span id="userEmail" style="font-size: 14px; color: #888;"></span>
+                    <button class="logout-btn" onclick="logout()">Выход</button>
                 </div>
+            </div>
 
-                <div class="filter-status" id="filterStatus">
-                    <button class="filter-status-btn active" onclick="filterByStatus('all')">Все</button>
-                    <button class="filter-status-btn" onclick="filterByStatus('bought')">✅ Выкуплено</button>
-                    <button class="filter-status-btn" onclick="filterByStatus('shipped')">🚚 Отправлено</button>
-                    <button class="filter-status-btn" onclick="filterByStatus('delivered')">🎉 Доставлено</button>
-                    <button class="filter-status-btn" onclick="filterByStatus('cancelled')">❌ Отменён</button>
-                    <button class="filter-status-btn" onclick="filterByStatus('refund')">↩️ Возврат</button>
+            <!-- STATS -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="value" id="totalOrders">0</div>
+                    <div class="label">Всего заказов</div>
                 </div>
+                <div class="stat-card">
+                    <div class="value" id="totalProducts">0</div>
+                    <div class="label">Товары</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="boughtOrders">0</div>
+                    <div class="label">Выкуплено</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="deliveredOrders">0</div>
+                    <div class="label">Доставлено</div>
+                </div>
+            </div>
 
-                <div id="ordersContainer" class="orders-table">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Загрузка заказов...</p>
+            <!-- TABS -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('ordersTab')">📦 Заказы</button>
+                <button class="tab-btn" onclick="switchTab('productsTab')">📚 Товары</button>
+                <button class="tab-btn" onclick="switchTab('settingsTab')">⚙️ Настройки</button>
+            </div>
+
+            <!-- ORDERS TAB -->
+            <div id="ordersTab" class="tab-content active">
+                <div class="card">
+                    <h2>Управление заказами</h2>
+                    
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Поиск по ID, имени или товарам..."
+                            onkeyup="filterOrders()"
+                        >
                     </div>
+
+                    <div class="filter-btn-group">
+                        <button class="filter-status-btn active" onclick="filterByStatus('all')">Все</button>
+                        <button class="filter-status-btn" onclick="filterByStatus('bought')">Выкуплено</button>
+                        <button class="filter-status-btn" onclick="filterByStatus('shipped')">Отправлено</button>
+                        <button class="filter-status-btn" onclick="filterByStatus('delivered')">Доставлено</button>
+                        <button class="filter-status-btn" onclick="filterByStatus('cancelled')">Отменено</button>
+                    </div>
+
+                    <div class="table-responsive" id="ordersContainer"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- SETTINGS TAB -->
-        <div id="settings" class="tab-content">
-            <div class="card">
-                <h2>Настройки системы</h2>
-                
-                <div class="form-group">
-                    <label>Пароль администратора</label>
-                    <input type="password" id="adminPassword" placeholder="Новый пароль (оставьте пустым для без изменений)">
-                    <button class="btn-primary" onclick="updateAdminPassword()">Изменить пароль</button>
+            <!-- PRODUCTS TAB -->
+            <div id="productsTab" class="tab-content">
+                <div class="card">
+                    <h2>
+                        Управление товарами
+                        <button class="btn-primary btn-sm" onclick="openAddProductModal()">+ Добавить товар</button>
+                    </h2>
+                    <div class="table-responsive" id="productsContainer"></div>
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div id="settingsTab" class="tab-content">
+                <div class="card">
+                    <h2>Смена пароля</h2>
+                    <div class="form-group">
+                        <label class="form-label">Новый пароль</label>
+                        <input 
+                            type="password" 
+                            id="adminPassword" 
+                            class="form-input"
+                            placeholder="Введите новый пароль"
+                        >
+                    </div>
+                    <button class="btn-submit" onclick="updateAdminPassword()">Сохранить пароль</button>
                 </div>
 
-                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
-
-                <div class="form-group">
-                    <label>ID Telegram чата для уведомлений</label>
-                    <input type="text" id="telegramChatId" placeholder="ID чата">
-                    <button class="btn-primary" onclick="updateTelegramSettings()">Сохранить</button>
+                <div class="card">
+                    <h2>Интеграции</h2>
+                    <div class="form-group">
+                        <label class="form-label">Supabase URL</label>
+                        <input 
+                            type="text" 
+                            id="supabaseUrl" 
+                            class="form-input"
+                            placeholder="https://xxx.supabase.co"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Supabase Ключ</label>
+                        <input 
+                            type="text" 
+                            id="supabaseKey" 
+                            class="form-input"
+                            placeholder="eyJhbG..."
+                        >
+                    </div>
+                    <button class="btn-submit" onclick="updateSupabaseSettings()">Сохранить</button>
                 </div>
 
-                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
-
-                <div class="form-group">
-                    <label>Статистика</label>
-                    <button class="btn-secondary" onclick="exportStats()">📊 Экспортировать статистику</button>
+                <div class="card">
+                    <h2>Экспорт данных</h2>
+                    <button class="btn-submit" onclick="exportOrdersStats()">📊 Скачать статистику заказов</button>
+                    <button class="btn-submit" onclick="exportProductsData()" style="margin-top: 10px;">📦 Скачать каталог товаров</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- STATUS CHANGE MODAL -->
+<!-- STATUS MODAL -->
 <div id="statusModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             Изменить статус
-            <button class="close-btn" onclick="closeStatusModal()">×</button>
+            <button class="modal-close" onclick="closeStatusModal()">×</button>
         </div>
-        
         <div id="modalOrderInfo"></div>
-
         <div class="form-group">
-            <label>Новый статус</label>
-            <select id="statusSelect">
-                <option value="">Выберите статус</option>
+            <label class="form-label">Новый статус</label>
+            <select id="statusSelect" class="form-input">
                 <option value="bought">✅ Выкуплено</option>
                 <option value="shipped">🚚 Отправлено</option>
                 <option value="delivered">🎉 Доставлено</option>
-                <option value="cancelled">❌ Отменён</option>
+                <option value="cancelled">❌ Отменено</option>
                 <option value="refund">↩️ Возврат</option>
             </select>
         </div>
-
-        <div class="modal-footer">
-            <button class="btn-secondary" onclick="closeStatusModal()">Отмена</button>
-            <button class="btn-primary" onclick="updateOrderStatus()">Сохранить</button>
-        </div>
+        <button class="btn-submit" onclick="updateOrderStatus()" style="width: 100%;">Сохранить</button>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/module/index.js" type="module"></script>
+<!-- PRODUCT MODAL -->
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="productModalTitle">Добавить товар</span>
+            <button class="modal-close" onclick="closeProductModal()">×</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Название</label>
+            <input type="text" id="productName" class="form-input" placeholder="Название товара">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea id="productDescription" class="form-textarea" placeholder="Описание товара"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Цена (₽)</label>
+            <input type="number" id="productPrice" class="form-input" placeholder="0">
+        </div>
+        <div class="form-group">
+            <label class="form-label">URL изображения</label>
+            <input type="text" id="productImage" class="form-input" placeholder="https://...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Категория</label>
+            <input type="text" id="productCategory" class="form-input" placeholder="Категория товара">
+        </div>
+        <button class="btn-submit" onclick="saveProduct()" style="width: 100%; margin-bottom: 10px;">💾 Сохранить</button>
+        <button class="btn-secondary" onclick="closeProductModal()" style="width: 100%;">Отмена</button>
+    </div>
+</div>
 
-<script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/module/index.js';
+<script src="/api/telegram.js"></script>
 
-    // SUPABASE CONFIG
-    const SUPABASE_URL = 'https://fbwbwrqepdjiliiabedh.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZid2J3cnFlcGRqaWxpaWFiZWRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTA1NjMsImV4cCI6MjA5NDMyNjU2M30.a4RaEbcicNA0moct5bSjEeLNbsumbp8jDno4bkuWlJA';
-    
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script>
+    // ===== SUPABASE КОНФИГУРАЦИЯ =====
+    let supabase = null;
+    let currentUser = null;
 
-    const ADMIN_PASSWORD = 'admin123';
+    // ===== STATE =====
     let orders = [];
+    let products = [];
     let filteredOrders = [];
-    let currentStatusOrder = null;
     let currentStatusFilter = 'all';
+    let currentStatusOrder = null;
+    let currentEditProductId = null;
 
-    // STATUS TRANSLATIONS
+    // ===== STATUS LABELS =====
     const STATUS_LABELS = {
         bought: '✅ Выкуплено',
         shipped: '🚚 Отправлено',
         delivered: '🎉 Доставлено',
-        cancelled: '❌ Отменён',
+        cancelled: '❌ Отменено',
         refund: '↩️ Возврат'
     };
 
@@ -706,73 +702,120 @@
         refund: 'status-refund'
     };
 
-    // LOGIN
+    // ===== SUPABASE ИНИЦИАЛИЗАЦИЯ =====
+    async function initSupabase() {
+        const url = localStorage.getItem('supabaseUrl') || 'https://suvqxlqkdaajwypqzpug.supabase.co';
+        const key = localStorage.getItem('supabaseKey') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+
+        if (!supabase && url && key) {
+            const { createClient } = window.supabase;
+            supabase = createClient(url, key);
+        }
+    }
+
+    // ===== LOGIN =====
     window.login = function() {
         const password = document.getElementById('passwordInput').value;
-        if (password === ADMIN_PASSWORD) {
+        const savedPassword = localStorage.getItem('adminPassword') || 'admin123';
+
+        if (password === savedPassword) {
             localStorage.setItem('adminLogged', 'true');
             showDashboard();
+            showSuccess('✅ Вы успешно вошли в систему');
         } else {
-            const errorEl = document.getElementById('loginError');
-            errorEl.textContent = '❌ Неверный пароль';
-            errorEl.classList.remove('hidden');
+            showError('❌ Неверный пароль');
+            document.getElementById('passwordInput').value = '';
         }
     };
 
-    window.logout = function() {
-        localStorage.removeItem('adminLogged');
-        location.reload();
-    };
-
-    // SHOW DASHBOARD
-    function showDashboard() {
+    // ===== SHOW DASHBOARD =====
+    window.showDashboard = async function() {
         document.getElementById('loginPage').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
-        loadOrders();
-    }
+        
+        await initSupabase();
+        await loadOrders();
+        await loadProducts();
+    };
 
-    // LOAD ORDERS FROM SUPABASE
+    // ===== SHOW LOGIN PAGE =====
+    window.showLoginPage = function() {
+        document.getElementById('dashboard').classList.add('hidden');
+        document.getElementById('loginPage').classList.remove('hidden');
+    };
+
+    // ===== LOGOUT =====
+    window.logout = function() {
+        localStorage.removeItem('adminLogged');
+        showLoginPage();
+        showSuccess('✅ Вы вышли из системы');
+    };
+
+    // ===== LOAD ORDERS =====
     window.loadOrders = async function() {
         try {
-            const { data, error } = await supabase
-                .from('orders')
-                .select('*')
-                .order('created_at', { ascending: false });
+            if (!supabase) {
+                // Использование localStorage если Supabase не настроен
+                const stored = localStorage.getItem('orders');
+                orders = stored ? JSON.parse(stored) : [];
+            } else {
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-            if (error) throw error;
+                if (error) throw error;
+                orders = data || [];
+            }
 
-            orders = data || [];
-            filteredOrders = orders;
-            updateStats();
+            filteredOrders = [...orders];
             renderOrders();
+            updateStats();
         } catch (err) {
             console.error('Error loading orders:', err);
-            showError('Ошибка загрузки заказов: ' + err.message);
+            showError('Ошибка при загрузке заказов');
         }
     };
 
-    // UPDATE STATS
-    function updateStats() {
-        const stats = {
-            total: orders.length,
-            bought: orders.filter(o => o.status === 'bought').length,
-            shipped: orders.filter(o => o.status === 'shipped').length,
-            delivered: orders.filter(o => o.status === 'delivered').length
-        };
+    // ===== LOAD PRODUCTS =====
+    window.loadProducts = async function() {
+        try {
+            if (!supabase) {
+                const stored = localStorage.getItem('products');
+                products = stored ? JSON.parse(stored) : [];
+            } else {
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-        document.getElementById('totalOrders').textContent = stats.total;
-        document.getElementById('boughtOrders').textContent = stats.bought;
-        document.getElementById('shippedOrders').textContent = stats.shipped;
-        document.getElementById('deliveredOrders').textContent = stats.delivered;
+                if (error) throw error;
+                products = data || [];
+            }
+
+            renderProducts();
+            updateStats();
+        } catch (err) {
+            console.error('Error loading products:', err);
+            showError('Ошибка при загрузке товаров');
+        }
+    };
+
+    // ===== UPDATE STATS =====
+    function updateStats() {
+        document.getElementById('totalOrders').textContent = orders.length;
+        document.getElementById('totalProducts').textContent = products.length;
+        document.getElementById('boughtOrders').textContent = orders.filter(o => o.status === 'bought').length;
+        document.getElementById('deliveredOrders').textContent = orders.filter(o => o.status === 'delivered').length;
     }
 
-    // RENDER ORDERS TABLE
-    function renderOrders() {
+    // ===== RENDER ORDERS =====
+    window.renderOrders = function() {
         const container = document.getElementById('ordersContainer');
-        
+
         if (filteredOrders.length === 0) {
             container.innerHTML = `
-                <div class="empty">
+                <div class="empty-state">
                     <div class="empty-icon">📭</div>
                     <p>Нет заказов</p>
                 </div>
@@ -784,7 +827,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID заказа</th>
+                        <th>ID</th>
                         <th>Клиент</th>
                         <th>Товары</th>
                         <th>Сумма</th>
@@ -811,7 +854,7 @@
 
             html += `
                 <tr>
-                    <td class="order-id">#${shortId}</td>
+                    <td>#${shortId}</td>
                     <td>${order.name || '—'}</td>
                     <td>${order.items || '—'}</td>
                     <td>${order.total || '—'}</td>
@@ -829,9 +872,56 @@
 
         html += `</tbody></table>`;
         container.innerHTML = html;
-    }
+    };
 
-    // FILTER ORDERS
+    // ===== RENDER PRODUCTS =====
+    window.renderProducts = function() {
+        const container = document.getElementById('productsContainer');
+
+        if (products.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <p>Нет товаров</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Категория</th>
+                        <th>Цена</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        products.forEach(product => {
+            html += `
+                <tr>
+                    <td>${product.name || '—'}</td>
+                    <td>${product.category || '—'}</td>
+                    <td>${product.price || 0}₽</td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn-primary btn-sm" onclick="editProduct('${product.id}')">Редактировать</button>
+                            <button class="btn-danger btn-sm" onclick="deleteProduct('${product.id}')">Удалить</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    };
+
+    // ===== FILTER ORDERS =====
     window.filterOrders = function() {
         const searchText = document.getElementById('searchInput').value.toLowerCase();
         
@@ -849,7 +939,7 @@
         renderOrders();
     };
 
-    // FILTER BY STATUS
+    // ===== FILTER BY STATUS =====
     window.filterByStatus = function(status) {
         currentStatusFilter = status;
         
@@ -861,7 +951,7 @@
         filterOrders();
     };
 
-    // OPEN STATUS MODAL
+    // ===== OPEN STATUS MODAL =====
     window.openStatusModal = function(orderId) {
         currentStatusOrder = orders.find(o => o.id === orderId);
         if (!currentStatusOrder) return;
@@ -882,13 +972,13 @@
         document.getElementById('statusModal').classList.add('active');
     };
 
-    // CLOSE STATUS MODAL
+    // ===== CLOSE STATUS MODAL =====
     window.closeStatusModal = function() {
         document.getElementById('statusModal').classList.remove('active');
         currentStatusOrder = null;
     };
 
-    // UPDATE ORDER STATUS
+    // ===== UPDATE ORDER STATUS =====
     window.updateOrderStatus = async function() {
         if (!currentStatusOrder) return;
 
@@ -899,15 +989,34 @@
         }
 
         try {
-            const { error } = await supabase
-                .from('orders')
-                .update({
-                    status: newStatus,
-                    status_updated_at: new Date().toISOString()
-                })
-                .eq('id', currentStatusOrder.id);
+            if (!supabase) {
+                const orderIndex = orders.findIndex(o => o.id === currentStatusOrder.id);
+                if (orderIndex !== -1) {
+                    orders[orderIndex].status = newStatus;
+                    orders[orderIndex].status_updated_at = new Date().toISOString();
+                    localStorage.setItem('orders', JSON.stringify(orders));
+                }
+            } else {
+                const { error } = await supabase
+                    .from('orders')
+                    .update({
+                        status: newStatus,
+                        status_updated_at: new Date().toISOString()
+                    })
+                    .eq('id', currentStatusOrder.id);
 
-            if (error) throw error;
+                if (error) throw error;
+            }
+
+            // Отправляем уведомление в Telegram
+            if (window.TelegramBot && window.TelegramBot.notifyStatusChange) {
+                await TelegramBot.notifyStatusChange(
+                    currentStatusOrder.id,
+                    currentStatusOrder.status,
+                    newStatus,
+                    { name: currentStatusOrder.name }
+                );
+            }
 
             closeStatusModal();
             await loadOrders();
@@ -918,7 +1027,7 @@
         }
     };
 
-    // VIEW ORDER DETAILS
+    // ===== VIEW ORDER DETAILS =====
     window.viewOrderDetails = function(orderId) {
         const order = orders.find(o => o.id === orderId);
         if (!order) return;
@@ -928,15 +1037,132 @@
 👤 Клиент: ${order.name || '—'}
 📦 Товары: ${order.items || '—'}
 💰 Сумма: ${order.total || '—'}
-📅 Дата заказа: ${new Date(order.created_at).toLocaleString('ru-RU')}
+📅 Дата: ${new Date(order.created_at).toLocaleString('ru-RU')}
 🔄 Статус: ${STATUS_LABELS[order.status] || order.status}
+🚚 Доставка: ${order.pvz ? `ПВЗ: ${order.pvz}` : (order.address || '—')}
 📝 Примечание: ${order.note || 'Отсутствует'}
         `;
 
         alert(details);
     };
 
-    // SWITCH TAB
+    // ===== PRODUCT OPERATIONS =====
+    window.openAddProductModal = function() {
+        currentEditProductId = null;
+        document.getElementById('productModalTitle').textContent = 'Добавить товар';
+        document.getElementById('productName').value = '';
+        document.getElementById('productDescription').value = '';
+        document.getElementById('productPrice').value = '';
+        document.getElementById('productImage').value = '';
+        document.getElementById('productCategory').value = '';
+        document.getElementById('productModal').classList.add('active');
+    };
+
+    window.editProduct = function(productId) {
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+
+        currentEditProductId = productId;
+        document.getElementById('productModalTitle').textContent = 'Редактировать товар';
+        document.getElementById('productName').value = product.name || '';
+        document.getElementById('productDescription').value = product.description || '';
+        document.getElementById('productPrice').value = product.price || '';
+        document.getElementById('productImage').value = product.image || '';
+        document.getElementById('productCategory').value = product.category || '';
+        document.getElementById('productModal').classList.add('active');
+    };
+
+    window.closeProductModal = function() {
+        document.getElementById('productModal').classList.remove('active');
+        currentEditProductId = null;
+    };
+
+    window.saveProduct = async function() {
+        const name = document.getElementById('productName').value.trim();
+        const description = document.getElementById('productDescription').value.trim();
+        const price = parseFloat(document.getElementById('productPrice').value);
+        const image = document.getElementById('productImage').value.trim();
+        const category = document.getElementById('productCategory').value.trim();
+
+        if (!name || !price) {
+            alert('Заполните название и цену');
+            return;
+        }
+
+        try {
+            const productData = {
+                name,
+                description,
+                price,
+                image,
+                category,
+                updated_at: new Date().toISOString()
+            };
+
+            if (!currentEditProductId) {
+                // Добавить новый товар
+                productData.created_at = new Date().toISOString();
+                productData.id = 'prod_' + Date.now();
+
+                if (!supabase) {
+                    products.push(productData);
+                    localStorage.setItem('products', JSON.stringify(products));
+                } else {
+                    const { error } = await supabase
+                        .from('products')
+                        .insert([productData]);
+                    if (error) throw error;
+                }
+            } else {
+                // Обновить существующий товар
+                if (!supabase) {
+                    const index = products.findIndex(p => p.id === currentEditProductId);
+                    if (index !== -1) {
+                        products[index] = { ...products[index], ...productData };
+                        localStorage.setItem('products', JSON.stringify(products));
+                    }
+                } else {
+                    const { error } = await supabase
+                        .from('products')
+                        .update(productData)
+                        .eq('id', currentEditProductId);
+                    if (error) throw error;
+                }
+            }
+
+            closeProductModal();
+            await loadProducts();
+            showSuccess('✅ Товар сохранен');
+        } catch (err) {
+            console.error('Error saving product:', err);
+            showError('Ошибка при сохранении товара: ' + err.message);
+        }
+    };
+
+    window.deleteProduct = async function(productId) {
+        if (!confirm('Вы уверены?')) return;
+
+        try {
+            if (!supabase) {
+                products = products.filter(p => p.id !== productId);
+                localStorage.setItem('products', JSON.stringify(products));
+            } else {
+                const { error } = await supabase
+                    .from('products')
+                    .delete()
+                    .eq('id', productId);
+                if (error) throw error;
+            }
+
+            await loadProducts();
+            showSuccess('✅ Товар удален');
+        } catch (err) {
+            console.error('Error deleting product:', err);
+            showError('Ошибка при удалении товара');
+        }
+    };
+
+    // ===== SWITCH TAB =====
     window.switchTab = function(tab) {
         document.querySelectorAll('.tab-content').forEach(el => {
             el.classList.remove('active');
@@ -949,7 +1175,7 @@
         event.target.classList.add('active');
     };
 
-    // UPDATE ADMIN PASSWORD
+    // ===== UPDATE ADMIN PASSWORD =====
     window.updateAdminPassword = function() {
         const newPassword = document.getElementById('adminPassword').value;
         if (!newPassword) {
@@ -957,26 +1183,30 @@
             return;
         }
 
-        // Save to localStorage (in production, use secure backend)
         localStorage.setItem('adminPassword', newPassword);
         document.getElementById('adminPassword').value = '';
         showSuccess('✅ Пароль изменен');
     };
 
-    // UPDATE TELEGRAM SETTINGS
-    window.updateTelegramSettings = function() {
-        const chatId = document.getElementById('telegramChatId').value;
-        if (!chatId) {
-            alert('Введите ID чата');
+    // ===== UPDATE SUPABASE SETTINGS =====
+    window.updateSupabaseSettings = function() {
+        const url = document.getElementById('supabaseUrl').value.trim();
+        const key = document.getElementById('supabaseKey').value.trim();
+
+        if (!url || !key) {
+            alert('Заполните все поля');
             return;
         }
 
-        localStorage.setItem('telegramChatId', chatId);
-        showSuccess('✅ Настройки Telegram сохранены');
+        localStorage.setItem('supabaseUrl', url);
+        localStorage.setItem('supabaseKey', key);
+        supabase = null; // Reset
+        initSupabase();
+        showSuccess('✅ Настройки Supabase сохранены');
     };
 
-    // EXPORT STATS
-    window.exportStats = function() {
+    // ===== EXPORT DATA =====
+    window.exportOrdersStats = function() {
         const stats = {
             totalOrders: orders.length,
             byStatus: {
@@ -986,26 +1216,37 @@
                 cancelled: orders.filter(o => o.status === 'cancelled').length,
                 refund: orders.filter(o => o.status === 'refund').length
             },
+            orders: orders,
             generatedAt: new Date().toISOString()
         };
 
-        const json = JSON.stringify(stats, null, 2);
+        downloadJSON(stats, `loa-orders-${Date.now()}.json`);
+        showSuccess('📊 Заказы экспортированы');
+    };
+
+    window.exportProductsData = function() {
+        downloadJSON(products, `loa-products-${Date.now()}.json`);
+        showSuccess('📦 Товары экспортированы');
+    };
+
+    function downloadJSON(data, filename) {
+        const json = JSON.stringify(data, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `loa-stats-${Date.now()}.json`;
+        a.download = filename;
         a.click();
+        URL.revokeObjectURL(url);
+    }
 
-        showSuccess('📊 Статистика экспортирована');
-    };
-
-    // HELPERS
+    // ===== HELPERS =====
     function showError(msg) {
         const div = document.createElement('div');
         div.className = 'error';
         div.textContent = msg;
-        document.querySelector('.container').insertBefore(div, document.querySelector('.stats-grid'));
+        const container = document.querySelector('.container');
+        container.insertBefore(div, container.firstChild);
         setTimeout(() => div.remove(), 3000);
     }
 
@@ -1013,11 +1254,12 @@
         const div = document.createElement('div');
         div.className = 'success';
         div.textContent = msg;
-        document.querySelector('.container').insertBefore(div, document.querySelector('.stats-grid'));
+        const container = document.querySelector('.container');
+        container.insertBefore(div, container.firstChild);
         setTimeout(() => div.remove(), 3000);
     }
 
-    // INIT
+    // ===== INIT =====
     if (localStorage.getItem('adminLogged') === 'true') {
         showDashboard();
     }
