@@ -8,6 +8,7 @@
     
     <!-- ПОДКЛЮЧЕНИЕ FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
@@ -399,6 +400,14 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const SUPABASE_URL = 'https://fbwbwrqepdjiliiabedh.supabase.co';
+
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZid2J3cnFlcGRqaWxpaWFiZWRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTA1NjMsImV4cCI6MjA5NDMyNjU2M30.a4RaEbcicNA0moct5bSjEeLNbsumbp8jDno4bkuWlJA';
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
 
 // ===== 2. ТОВАРЫ (ВОССТАНОВЛЕНО ПОЛНОСТЬЮ) =====
 const PRODUCTS = {
@@ -415,6 +424,61 @@ const PRODUCTS = {
          photos:['https://static.tildacdn.com/tild3433-3837-4332-a638-303037303435/noroot.png','https://i.imgur.com/dAAm0aq.jpg','https://i.imgur.com/imn539A.jpg'],
          desc:`<p><strong>Футболка LOA — Lost of All (White)</strong></p><p>Та же философия — чистый тон. Свободный оверсайз-крой, плотный хлопок.</p><p>Минималистичный принт спереди и крылья на спине. Футболка становится продолжением вашего внутреннего состояния.</p><p>Предзаказ: Изделие производится под заказ.<br>Срок отправки — до 14 дней после оформления.</p>` }
 };
+async function syncProductsFromSupabase() {
+
+    const { data: products } = await supabaseClient
+        .from('products')
+        .select('*');
+
+    const { data: sizes } = await supabaseClient
+        .from('sizes')
+        .select('*');
+
+    const { data: settings } = await supabaseClient
+        .from('settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
+    if(products){
+
+        products.forEach(sp => {
+
+            if(PRODUCTS[sp.id]){
+
+                PRODUCTS[sp.id].price = sp.price_rub;
+
+                PRODUCTS[sp.id].oldPrice = sp.old_price || 0;
+
+                PRODUCTS[sp.id].soldOut = sp.sold_out;
+
+                PRODUCTS[sp.id].badge = sp.badge || '';
+
+                const productSizes = sizes
+                    .filter(s =>
+                        s.product_id == sp.id &&
+                        !s.hidden
+                    )
+                    .map(s => s.size);
+
+                if(productSizes.length){
+                    PRODUCTS[sp.id].sizes = productSizes;
+                }
+            }
+        });
+    }
+
+    if(settings){
+
+        window.GLOBAL_DISCOUNT =
+            settings.global_discount || 0;
+
+        window.PROMO_TIMER_ENABLED =
+            settings.promo_timer_enabled || false;
+    }
+
+    syncProductsFromSupabase();
+}
 
 let cart = JSON.parse(localStorage.getItem('loa_cart') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('loa_wish') || '[]');
@@ -444,7 +508,24 @@ function renderCatalog() {
                 </button>
             </div>
             <div class="product-name">${p.name}</div>
-            <div class="product-price"><b>${p.price} р.</b> <span style="text-decoration:line-through; opacity:0.3;">${p.oldPrice} р.</span></div>
+            <div class="product-price">
+<b>${
+window.GLOBAL_DISCOUNT
+? Math.round(
+p.price -
+(p.price * window.GLOBAL_DISCOUNT / 100)
+)
+: p.price
+} р.</b>
+
+<span style="text-decoration:line-through; opacity:0.3;">
+${
+p.oldPrice
+? p.oldPrice
+: ''
+} р.
+</span>
+</div>
         </div>
     `).join('');
     const obs = new IntersectionObserver((es)=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')), {threshold:0.1});
