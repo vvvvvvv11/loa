@@ -168,7 +168,27 @@
         .status-step-dot { width:8px; height:8px; border-radius:50%; background:#e0e0e0; margin:0 auto 4px; }
         .status-step.done .status-step-dot { background:#000; }
         .status-step.current .status-step-dot { background:#000; box-shadow:0 0 0 3px rgba(0,0,0,0.15); }
+        .product-card.sold-out{
+    opacity:0.45;
+    position:relative;
+}
 
+.product-card.sold-out::after{
+    content:'SOLD OUT';
+    position:absolute;
+    top:18px;
+    left:18px;
+    background:#000;
+    color:#fff;
+    padding:8px 14px;
+    font-size:11px;
+    letter-spacing:2px;
+    z-index:20;
+}
+
+.product-card.sold-out .product-img{
+    filter:grayscale(1);
+}
         </style>
 </head>
 <body>
@@ -426,58 +446,73 @@ const PRODUCTS = {
 };
 async function syncProductsFromSupabase() {
 
-    const { data: products } = await supabaseClient
-        .from('products')
-        .select('*');
+    try {
 
-    const { data: sizes } = await supabaseClient
-        .from('sizes')
-        .select('*');
+        const { data: products } = await supabaseClient
+            .from('products')
+            .select('*');
 
-    const { data: settings } = await supabaseClient
-        .from('settings')
-        .select('*')
-        .eq('id', 1)
-        .single();
+        const { data: sizes } = await supabaseClient
+            .from('sizes')
+            .select('*');
 
-    if(products){
+        const { data: settings } = await supabaseClient
+            .from('settings')
+            .select('*')
+            .eq('id', 1)
+            .single();
 
-        products.forEach(sp => {
+        if(products){
 
-            if(PRODUCTS[sp.id]){
+            products.forEach(sp => {
 
-                PRODUCTS[sp.id].price = sp.price_rub;
+                if(PRODUCTS[sp.id]){
 
-                PRODUCTS[sp.id].oldPrice = sp.old_price || 0;
+                    PRODUCTS[sp.id].price =
+                        sp.price_rub;
 
-                PRODUCTS[sp.id].soldOut = sp.sold_out;
+                    PRODUCTS[sp.id].oldPrice =
+                        sp.old_price || 0;
 
-                PRODUCTS[sp.id].badge = sp.badge || '';
+                    PRODUCTS[sp.id].soldOut =
+                        sp.sold_out;
 
-                const productSizes = sizes
-                    .filter(s =>
-                        s.product_id == sp.id &&
-                        !s.hidden
-                    )
-                    .map(s => s.size);
+                    PRODUCTS[sp.id].badge =
+                        sp.badge || '';
 
-                if(productSizes.length){
-                    PRODUCTS[sp.id].sizes = productSizes;
+                    const productSizes = sizes
+                        .filter(s =>
+                            s.product_id == sp.id &&
+                            !s.hidden
+                        )
+                        .map(s => s.size);
+
+                    if(productSizes.length){
+
+                        PRODUCTS[sp.id].sizes =
+                            productSizes;
+                    }
                 }
-            }
-        });
+            });
+        }
+
+        if(settings){
+
+            window.GLOBAL_DISCOUNT =
+                settings.global_discount || 0;
+
+            window.PROMO_TIMER_ENABLED =
+                settings.promo_timer_enabled || false;
+        }
+
+        renderCatalog();
+
+    } catch(err){
+
+        console.log(err);
+
+        renderCatalog();
     }
-
-    if(settings){
-
-        window.GLOBAL_DISCOUNT =
-            settings.global_discount || 0;
-
-        window.PROMO_TIMER_ENABLED =
-            settings.promo_timer_enabled || false;
-    }
-
-    syncProductsFromSupabase();
 }
 
 let cart = JSON.parse(localStorage.getItem('loa_cart') || '[]');
@@ -500,7 +535,7 @@ auth.onAuthStateChanged(user => {
 
 function renderCatalog() {
     document.getElementById('catalog-grid').innerHTML = Object.values(PRODUCTS).map(p => `
-        <div class="product-card fade-up" onclick="openProduct(${p.id})">
+        <div class="product-card fade-up ${p.soldOut ? 'sold-out' : ''}" onclick="openProduct(${p.id})">
             <div class="product-img-wrap">
                 <img src="${p.photos[0]}" class="product-img">
                 <button class="wish-btn ${wishlist.some(w=>w.id===p.id)?'liked':''}" onclick="event.stopPropagation(); toggleWish(${p.id})">
@@ -879,9 +914,9 @@ function renderOrderCard(doc) {
 }
 
 // СТАРТ
-syncProductsFromSupabase();
 updateCartUI();
 updateWishUI();
+syncProductsFromSupabase();
 </script>
 
 
