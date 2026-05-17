@@ -125,64 +125,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // 2. Скрытие/Показ размера
-    if (isset($_POST['toggle_size_hidden'])) {
-        $productId = $_POST['size_product_id'];
-        $sizeName = $_POST['size_name'];
-        $currentHidden = ($_POST['current_hidden'] === '1');
-        $newHidden = !$currentHidden;
+    // 2. Скрытие/Показ размера (ИСПРАВЛЕНО)
+if (isset($_POST['toggle_size_hidden'])) {
+    $productId = $_POST['size_product_id'];
+    $sizeName = $_POST['size_name'];
+    $currentHidden = ($_POST['current_hidden'] === '1');
+    $newHidden = !$currentHidden;
 
-        $queryParams = http_build_query([
-            'product_id' => "eq.$productId",
-            'size'       => "eq.$sizeName"
+    $result = supabaseRequest('PATCH', "sizes?product_id=eq.$productId&size=eq.$sizeName", ['hidden' => $newHidden]);
+    
+    if (isset($result['error'])) {
+        die("Ошибка скрытия размера: " . print_r($result, true));
+    }
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+// 3. Удаление размера (ИСПРАВЛЕНО)
+if (isset($_POST['delete_size'])) {
+    $productId = $_POST['delete_size_product'];
+    $sizeName = $_POST['delete_size_name'];
+
+    $result = supabaseRequest('DELETE', "sizes?product_id=eq.$productId&size=eq.$sizeName", null);
+    
+    if (isset($result['error'])) {
+        die("Ошибка удаления размера: " . print_r($result, true));
+    }
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+// 4. Добавление размера (ЭТОТ БЛОК РАБОТАЕТ, НО ПРОВЕРЬ)
+if (isset($_POST['add_new_size'])) {
+    $productId = $_POST['new_size_product_id'];
+    $newSize = trim($_POST['new_size_name']);
+    
+    if (!empty($newSize)) {
+        $result = supabaseRequest('POST', 'sizes', [
+            'product_id' => $productId,
+            'size' => $newSize,
+            'hidden' => false
         ]);
-
-        $result = supabaseRequest('PATCH', "sizes?$queryParams", ['hidden' => $newHidden]);
-        
         if (isset($result['error'])) {
-            die("Ошибка скрытия размера: " . $result['error']);
+            die("Ошибка добавления размера: " . $result['error']);
         }
-        header('Location: ' . $_SERVER['PHP_SELF']);
-        exit;
     }
-
-    // 3. Удаление размера
-    if (isset($_POST['delete_size'])) {
-        $productId = $_POST['delete_size_product'];
-        $sizeName = $_POST['delete_size_name'];
-
-        $queryParams = http_build_query([
-            'product_id' => "eq.$productId",
-            'size'       => "eq.$sizeName"
-        ]);
-
-        $result = supabaseRequest('DELETE', "sizes?$queryParams", null);
-        
-        if (isset($result['error'])) {
-            die("Ошибка удаления размера: " . $result['error']);
-        }
-        header('Location: ' . $_SERVER['PHP_SELF']);
-        exit;
-    }
-
-    // 4. Добавление нового размера
-    if (isset($_POST['add_new_size'])) {
-        $productId = $_POST['new_size_product_id'];
-        $newSize = trim($_POST['new_size_name']);
-        
-        if (!empty($newSize)) {
-            $result = supabaseRequest('POST', 'sizes', [
-                'product_id' => $productId,
-                'size' => $newSize,
-                'hidden' => false
-            ]);
-            if (isset($result['error'])) {
-                die("Ошибка добавления размера: " . $result['error']);
-            }
-        }
-        header('Location: ' . $_SERVER['PHP_SELF']);
-        exit;
-    }
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
+}
 
     // 5. Глобальная скидка
     if (isset($_POST['update_global_discount'])) {
