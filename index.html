@@ -189,6 +189,29 @@
 .product-card.sold-out .product-img{
     filter:grayscale(1);
 }
+/* Стили для недоступных размеров */
+.pp-size-select option:disabled {
+    text-decoration: line-through;
+    color: #999;
+}
+
+.unavailable-size {
+    text-decoration: line-through;
+    color: #999;
+    background: #f5f5f5;
+    cursor: not-allowed !important;
+}
+
+/* Блок с недоступными размерами */
+.hidden-sizes-info {
+    font-size: 11px;
+    color: #999;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
         </style>
 </head>
 <body>
@@ -421,121 +444,118 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const SUPABASE_URL = 'https://fbwbwrqepdjiliiabedh.supabase.co';
-
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZid2J3cnFlcGRqaWxpaWFiZWRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTA1NjMsImV4cCI6MjA5NDMyNjU2M30.a4RaEbcicNA0moct5bSjEeLNbsumbp8jDno4bkuWlJA';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
-
-// ===== 2. ТОВАРЫ (ВОССТАНОВЛЕНО ПОЛНОСТЬЮ) =====
 const PRODUCTS = {
-    1: { id:1, name:'Цепь "Loa"', price:1500, oldPrice:3000, hasSize:false,
+    1: { id:1, name:'Цепь "Loa"', price:1500, oldPrice:3000, hasSize:false, sizes: [],
          photos:['https://static.tildacdn.com/tild6165-3661-4435-b565-336238373737/photo.jpg','https://thb.tildacdn.com/tild6165-3164-4366-b736-643835303761/-/resize/1200x/__.jpg'],
          desc:`<p><strong>Подвеска LOA — Chain</strong></p><p>Подвеска LOA — это финальный акцент дропа. Минимальный, но считываемый. Не про демонстрацию, а про принадлежность.</p><p>Буквы LOA выполнены в чёткой форме и зафиксированы на массивной цепи, создавая баланс между чистотой и весом. Подвеска ощущается как объект, а не украшение — она дополняет образ, не перетягивая внимание.</p><p>Работает как самостоятельный элемент и как продолжение философии дропа: тишина, утрата, контроль.</p><p>Подвеска производится под заказ.<br>Срок отправки — до 14 дней с момента оформления.</p>` },
-    2: { id:2, name:'Худи "Loa"', price:5000, oldPrice:7000, hasSize:true,
+    2: { id:2, name:'Худи "Loa"', price:5000, oldPrice:7000, hasSize:true, sizes: ['S','M','L'],
          photos:['https://static.tildacdn.com/tild6362-3038-4835-b031-313564643538/photo.jpg','https://i.imgur.com/R00rZyU.jpg','https://i.imgur.com/BeII4y1.jpg'],
          desc:`<p><strong>Худи LOA — Wings (Black)</strong></p><p>Худи Wings — центральный объект дропа. Про внутреннюю тяжесть и скрытую силу, про желание уйти и остаться одновременно.</p><p>Крылья на груди выполнены в мягком, матовом сером оттенке — без резких границ и лишней агрессии. Они не выглядят как декор, а как часть ткани и формы.</p><p>Плотный футер, свободная посадка и чистый крой делают худи максимально комфортным для повседневной носки, при этом сохраняя характер и глубину.</p><p>Худи производится под заказ.<br>Срок отправки — до 14 дней после оформления.</p>` },
-    3: { id:3, name:'Футболка "Loa" BLACK', price:3500, oldPrice:5000, hasSize:true,
+    3: { id:3, name:'Футболка "Loa" BLACK', price:3500, oldPrice:5000, hasSize:true, sizes: ['S','M','L'],
          photos:['https://static.tildacdn.com/tild3666-3432-4666-b035-373633363835/noroot.png','https://i.imgur.com/SOhZvD0.jpeg','https://i.imgur.com/wqEGG8Q.jpg'],
          desc:`<p><strong>Футболка LOA — Lost of All (Black)</strong></p><p>Футболка Lost of All — это состояние, а не фраза. Про момент, когда всё лишнее исчезает, и остаёшься только ты и тишина.</p><p>Минималистичный фронтальный принт выполнен в мягком, почти незаметном тоне — он читается только вблизи. На спине — крылья LOA, как символ утраты и одновременно внутренней свободы.</p><p>Свободный оверсайз-крой, плотный хлопок и чистые линии делают футболку базой, которая не устареет со временем.</p><p>Предзаказ: Изделие производится под заказ.<br>Срок отправки — до 14 дней после оформления.</p>` },
-    4: { id:4, name:'Футболка "Loa" WHITE', price:3500, oldPrice:5000, hasSize:true,
+    4: { id:4, name:'Футболка "Loa" WHITE', price:3500, oldPrice:5000, hasSize:true, sizes: ['S','M','L'],
          photos:['https://static.tildacdn.com/tild3433-3837-4332-a638-303037303435/noroot.png','https://i.imgur.com/dAAm0aq.jpg','https://i.imgur.com/imn539A.jpg'],
          desc:`<p><strong>Футболка LOA — Lost of All (White)</strong></p><p>Та же философия — чистый тон. Свободный оверсайз-крой, плотный хлопок.</p><p>Минималистичный принт спереди и крылья на спине. Футболка становится продолжением вашего внутреннего состояния.</p><p>Предзаказ: Изделие производится под заказ.<br>Срок отправки — до 14 дней после оформления.</p>` }
 };
-async function syncProductsFromSupabase() {
-
-    try {
-
-        const { data: products } = await supabaseClient
-            .from('products')
-            .select('*');
-
-        const { data: sizes } = await supabaseClient
-            .from('sizes')
-            .select('*');
-
-        const { data: settings } = await supabaseClient
-            .from('settings')
-            .select('*')
-            .eq('id', 1)
-            .single();
-
-        if(products){
-
-            products.forEach(sp => {
-
-                if(PRODUCTS[sp.id]){
-
-                    PRODUCTS[sp.id].price =
-                        sp.price_rub;
-
-                    PRODUCTS[sp.id].oldPrice =
-                        sp.old_price || 0;
-
-                    PRODUCTS[sp.id].soldOut =
-                        sp.sold_out;
-
-                    PRODUCTS[sp.id].badge =
-                        sp.badge || '';
-
-                    const productSizes = sizes
-                        .filter(s =>
-                            s.product_id == sp.id &&
-                            !s.hidden
-                        )
-                        .map(s => s.size);
-
-                    if(productSizes.length){
-
-                        PRODUCTS[sp.id].sizes =
-                            productSizes;
-                    }
-                }
-            });
-        }
-
-        if(settings){
-
-            window.GLOBAL_DISCOUNT =
-                settings.global_discount || 0;
-
-            window.PROMO_TIMER_ENABLED =
-                settings.promo_timer_enabled || false;
-        }
-
-        renderCatalog();
-
-    } catch(err){
-
-        console.log(err);
-
-        renderCatalog();
-    }
-}
 
 let cart = JSON.parse(localStorage.getItem('loa_cart') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('loa_wish') || '[]');
 let currentUser = null;
 
-// СИСТЕМА
-auth.onAuthStateChanged(user => {
-    if (user) {
-        db.collection('users').doc(user.uid).get().then(doc => {
-            currentUser = { uid: user.uid, ...doc.data() };
-            renderNavProfile();
-            checkSuccess();
-        });
-    } else {
-        currentUser = null;
-        renderNavProfile();
-    }
-});
+// Хранилище размеров с Supabase
+let productSizes = {};
 
+// Загрузка размеров из Supabase
+async function loadSizesFromSupabase() {
+    try {
+        const { data: sizes } = await supabaseClient
+            .from('sizes')
+            .select('*');
+        
+        if (sizes) {
+            sizes.forEach(size => {
+                if (!productSizes[size.product_id]) {
+                    productSizes[size.product_id] = [];
+                }
+                productSizes[size.product_id].push({
+                    name: size.size,
+                    hidden: size.hidden || false
+                });
+            });
+        }
+        
+        // Обновляем PRODUCTS с размерами
+        for (let pid in PRODUCTS) {
+            if (productSizes[pid] && PRODUCTS[pid].hasSize) {
+                PRODUCTS[pid].sizes = productSizes[pid].filter(s => !s.hidden).map(s => s.name);
+                PRODUCTS[pid].allSizes = productSizes[pid]; // сохраняем все размеры со статусом скрытия
+            }
+        }
+        
+        renderCatalog();
+    } catch(err) {
+        console.log('Ошибка загрузки размеров:', err);
+        renderCatalog();
+    }
+}
+
+async function syncProductsFromSupabase() {
+    try {
+        const { data: products } = await supabaseClient
+            .from('products')
+            .select('*');
+        
+        const { data: settings } = await supabaseClient
+            .from('settings')
+            .select('*')
+            .eq('id', 1)
+            .single();
+        
+        if(products){
+            products.forEach(sp => {
+                if(PRODUCTS[sp.id]){
+                    PRODUCTS[sp.id].price = sp.price_rub;
+                    PRODUCTS[sp.id].oldPrice = sp.old_price || 0;
+                    PRODUCTS[sp.id].soldOut = sp.sold_out;
+                    PRODUCTS[sp.id].badge = sp.badge || '';
+                }
+            });
+        }
+        
+        if(settings){
+            window.GLOBAL_DISCOUNT = settings.global_discount || 0;
+            window.PROMO_TIMER_ENABLED = settings.promo_timer_enabled || false;
+        }
+        
+        await loadSizesFromSupabase();
+    } catch(err){
+        console.log(err);
+        renderCatalog();
+    }
+}
+
+// Рендер каталога с размерами
 function renderCatalog() {
-    document.getElementById('catalog-grid').innerHTML = Object.values(PRODUCTS).map(p => `
-        <div class="product-card fade-up ${p.soldOut ? 'sold-out' : ''}" onclick="openProduct(${p.id})">
+    document.getElementById('catalog-grid').innerHTML = Object.values(PRODUCTS).map(p => {
+        const isSoldOut = p.soldOut;
+        const priceWithDiscount = window.GLOBAL_DISCOUNT ? Math.round(p.price - (p.price * window.GLOBAL_DISCOUNT / 100)) : p.price;
+        
+        // Генерируем HTML для размеров
+        let sizesHtml = '';
+        if (p.hasSize && p.sizes && p.sizes.length > 0) {
+            sizesHtml = `<div style="display:flex; gap:6px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
+                ${p.sizes.map(size => `<span style="font-size:11px; background:#f0f0f0; padding:4px 10px; border-radius:20px;">${size}</span>`).join('')}
+            </div>`;
+        } else if (p.hasSize && (!p.sizes || p.sizes.length === 0)) {
+            sizesHtml = `<div style="font-size:10px; color:#999; margin-top:8px; text-align:center;">Размеров нет в наличии</div>`;
+        }
+        
+        return `
+        <div class="product-card fade-up ${isSoldOut ? 'sold-out' : ''}" onclick="${isSoldOut ? '' : `openProduct(${p.id})`}" style="${isSoldOut ? 'pointer-events:none;' : 'cursor:pointer;'}">
             <div class="product-img-wrap">
                 <img src="${p.photos[0]}" class="product-img">
                 <button class="wish-btn ${wishlist.some(w=>w.id===p.id)?'liked':''}" onclick="event.stopPropagation(); toggleWish(${p.id})">
@@ -544,60 +564,114 @@ function renderCatalog() {
             </div>
             <div class="product-name">${p.name}</div>
             <div class="product-price">
-<b>${
-window.GLOBAL_DISCOUNT
-? Math.round(
-p.price -
-(p.price * window.GLOBAL_DISCOUNT / 100)
-)
-: p.price
-} р.</b>
-
-<span style="text-decoration:line-through; opacity:0.3;">
-${
-p.oldPrice
-? p.oldPrice
-: ''
-} р.
-</span>
-</div>
+                <b>${priceWithDiscount} р.</b>
+                ${p.oldPrice ? `<span style="text-decoration:line-through; opacity:0.3;">${p.oldPrice} р.</span>` : ''}
+            </div>
+            ${sizesHtml}
         </div>
-    `).join('');
+    `}).join('');
+    
     const obs = new IntersectionObserver((es)=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')), {threshold:0.1});
     document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
 }
 
-// ГАЛЕРЕЯ
-let galIdx = 0;
-function goGallery(i) { galIdx = i; document.getElementById('gallery-slides').style.transform = `translateX(-${i*100}%)`; document.querySelectorAll('.gallery-dot').forEach((d,j)=>d.classList.toggle('active',j===i)); }
-setInterval(() => goGallery((galIdx+1)%3), 4800);
-
-
-
-// ОВЕРЛЕЙ ТОВАРА
+// ОТКРЫТИЕ ТОВАРА С РАЗМЕРАМИ И ПРОВЕРКОЙ SOLD OUT
 let curP = null, curPhotoIdx = 0;
+
 function openProduct(id) {
-    curP = PRODUCTS[id]; curPhotoIdx = 0;
+    curP = PRODUCTS[id];
+    
+    // Проверка на SOLD OUT
+    if (curP.soldOut) {
+        alert('Товар распродан и недоступен для заказа');
+        return;
+    }
+    
+    curPhotoIdx = 0;
     document.getElementById('pp-name').innerText = curP.name;
-    document.getElementById('pp-price').innerHTML = `${curP.price} р. <span style="text-decoration:line-through; font-size:14px; opacity:0.3; margin-left:10px;">${curP.oldPrice} р.</span>`;
+    
+    const priceWithDiscount = window.GLOBAL_DISCOUNT ? Math.round(curP.price - (curP.price * window.GLOBAL_DISCOUNT / 100)) : curP.price;
+    document.getElementById('pp-price').innerHTML = `${priceWithDiscount} р. <span style="text-decoration:line-through; font-size:14px; opacity:0.3; margin-left:10px;">${curP.oldPrice} р.</span>`;
     document.getElementById('pp-desc').innerHTML = curP.desc;
-    document.getElementById('pp-size-wrap').style.display = curP.hasSize ? 'block' : 'none';
+    
+    // Генерация размеров (только НЕ скрытые)
+    if (curP.hasSize && curP.allSizes && curP.allSizes.length > 0) {
+        const availableSizes = curP.allSizes.filter(s => !s.hidden);
+        const hiddenSizes = curP.allSizes.filter(s => s.hidden);
+        
+        if (availableSizes.length > 0) {
+            let sizesHtml = '<select class="pp-size-select" id="pp-size" style="padding:10px; border-radius:10px; margin:15px 0; width:100%;">';
+            availableSizes.forEach(s => {
+                sizesHtml += `<option value="${s.name}">${s.name}</option>`;
+            });
+            sizesHtml += '</select>';
+            
+            // Добавляем перечеркнутые размеры если есть
+            if (hiddenSizes.length > 0) {
+                sizesHtml += '<div style="font-size:11px; color:#999; margin-top:-10px; margin-bottom:15px;">';
+                sizesHtml += '❌ Недоступны: ';
+                sizesHtml += hiddenSizes.map(s => `<span style="text-decoration:line-through;">${s.name}</span>`).join(', ');
+                sizesHtml += '</div>';
+            }
+            
+            document.getElementById('pp-size-wrap').innerHTML = sizesHtml;
+            document.getElementById('pp-size-wrap').style.display = 'block';
+        } else {
+            document.getElementById('pp-size-wrap').innerHTML = '<div style="color:#ff4444; font-size:13px; margin:15px 0;">❌ Нет доступных размеров для заказа</div>';
+            document.getElementById('pp-size-wrap').style.display = 'block';
+        }
+    } else if (curP.hasSize) {
+        document.getElementById('pp-size-wrap').innerHTML = '<div style="color:#ff4444; font-size:13px; margin:15px 0;">❌ Размеры не добавлены</div>';
+        document.getElementById('pp-size-wrap').style.display = 'block';
+    } else {
+        document.getElementById('pp-size-wrap').style.display = 'none';
+    }
+    
     renderPPPhotos();
     document.getElementById('pp-wish-btn').classList.toggle('liked', wishlist.some(w=>w.id===curP.id));
     document.getElementById('product-page').classList.add('open');
     document.body.style.overflow = 'hidden';
 }
+
+function ppAddToCart() {
+    // Проверяем, что товар не распродан
+    if (curP.soldOut) {
+        alert('Товар распродан и недоступен для заказа');
+        return;
+    }
+    
+    let size = '';
+    if (curP.hasSize) {
+        const sizeSelect = document.getElementById('pp-size');
+        if (sizeSelect && sizeSelect.value) {
+            size = ` (${sizeSelect.value})`;
+        } else {
+            // Проверяем, есть ли вообще доступные размеры
+            const availableSizes = curP.allSizes ? curP.allSizes.filter(s => !s.hidden) : [];
+            if (availableSizes.length === 0) {
+                alert('Нет доступных размеров для заказа');
+                return;
+            }
+        }
+    }
+    addToCart(curP.id, curP.name + size, curP.price);
+    document.getElementById('product-page').classList.remove('open');
+    document.body.style.overflow = '';
+    toggleCart();
+}
+
+// Остальные функции оставляем без изменений
 function renderPPPhotos() {
     document.getElementById('pp-main-photo').src = curP.photos[curPhotoIdx];
     document.getElementById('pp-thumbs').innerHTML = curP.photos.map((s,i)=>`<img class="pp-thumb ${i===curPhotoIdx?'active':''}" src="${s}" onclick="curPhotoIdx=${i};renderPPPhotos()">`).join('');
 }
+
 function ppNext() { curPhotoIdx = (curPhotoIdx + 1) % curP.photos.length; renderPPPhotos(); }
 function ppPrev() { curPhotoIdx = (curPhotoIdx - 1 + curP.photos.length) % curP.photos.length; renderPPPhotos(); }
-function ppAddToCart() { const s = curP.hasSize ? document.getElementById('pp-size').value : ''; addToCart(curP.id, curP.name+(s?` (${s})`:''), curP.price); document.getElementById('product-page').classList.remove('open'); document.body.style.overflow=''; toggleCart(); }
 function ppBackdropClick(e) { if(e.target.classList.contains('product-page-backdrop')) { document.getElementById('product-page').classList.remove('open'); document.body.style.overflow=''; } }
 function ppToggleWish() { toggleWish(curP.id); document.getElementById('pp-wish-btn').classList.toggle('liked', wishlist.some(w=>w.id===curP.id)); }
 
-// КОРЗИНА
+// КОРЗИНА (без изменений)
 function addToCart(id, name, price) { cart.push({id, name, price}); updateCartUI(); }
 function removeFromCart(i) { cart.splice(i,1); updateCartUI(); }
 function updateCartUI() {
@@ -610,7 +684,7 @@ function updateCartUI() {
 }
 function toggleCart() { document.getElementById('cart-sidebar').classList.toggle('open'); document.getElementById('cart-overlay').classList.toggle('open'); }
 
-// ИЗБРАННОЕ
+// ИЗБРАННОЕ (без изменений)
 function toggleWish(id) { 
     const idx = wishlist.findIndex(w=>w.id===id); 
     if(idx>=0) wishlist.splice(idx,1); else wishlist.push({id, name:PRODUCTS[id].name, price:PRODUCTS[id].price}); 
@@ -624,7 +698,7 @@ function updateWishUI() {
 }
 function toggleWishSidebar() { document.getElementById('wish-sidebar').classList.toggle('open'); document.getElementById('wish-overlay').classList.toggle('open'); }
 
-// TELEGRAM УВЕДОМЛЕНИЯ
+// TELEGRAM УВЕДОМЛЕНИЯ (без изменений)
 const TG_TOKEN = '8702046980:AAGhDyL4ArgIZckT3PxusNVDHpX6E_cVjOA';
 const TG_CHAT_ID = '7984183942';
 const TG_ADMIN_2 = '530361815';
@@ -639,7 +713,7 @@ function sendTelegramNotification(message) {
     });
 }
 
-// ОПЛАТА ЮMONEY
+// ОПЛАТА (без изменений)
 function payWithYooMoney() {
     if(!currentUser) return openAuth();
     if(!cart.length) return alert('Пусто');
@@ -650,9 +724,8 @@ function payWithYooMoney() {
     document.getElementById('autoYooForm').submit();
 }
 
-// ===== ОФОРМЛЕНИЕ ЗАКАЗА (С НОВЫМ ПВЗ) =====
+// ОФОРМЛЕНИЕ ЗАКАЗА (без изменений)
 const TG_ADMINS = ['530361815', '7984183942'];
-
 function sendTG(msg) {
     TG_ADMINS.forEach(chatId => {
         fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
@@ -722,7 +795,6 @@ function submitOrder() {
     const tg = document.getElementById('order-tg').value.trim();
     if (!name || !phone) return alert('Заполните имя и телефон');
     
-    // ПОЛУЧАЕМ ВЫБРАННЫЙ ПВЗ ИЗ ГЛОБАЛЬНОЙ ПЕРЕМЕННОЙ
     const selectedPvz = window.selectedPvz;
     if (!selectedPvz) {
         alert('Выберите пункт выдачи');
@@ -816,7 +888,20 @@ function checkSuccess() {
 }
 function closeSuccessModal() { cart=[]; updateCartUI(); window.location.href = window.location.pathname; }
 
-// AUTH
+// AUTH (без изменений)
+auth.onAuthStateChanged(user => {
+    if (user) {
+        db.collection('users').doc(user.uid).get().then(doc => {
+            currentUser = { uid: user.uid, ...doc.data() };
+            renderNavProfile();
+            checkSuccess();
+        });
+    } else {
+        currentUser = null;
+        renderNavProfile();
+    }
+});
+
 function doReg() {
     const n = document.getElementById('reg-name').value, e = document.getElementById('reg-email').value, p = document.getElementById('reg-pass').value;
     auth.createUserWithEmailAndPassword(e, p).then(r => db.collection('users').doc(r.user.uid).set({name:n, email:e})).then(()=>closeAuth()).catch(err=>alert(err.message));
@@ -870,7 +955,6 @@ function closeSideMenu() {
     document.body.style.overflow = '';
 }
 
-// ===== СТАТУСЫ ЗАКАЗОВ =====
 const ORDER_STATUSES = {
     new:       { label: '🆕 Новый',           class: 'status-new',       step: 0 },
     bought:    { label: '✅ Выкуплено',        class: 'status-bought',    step: 1 },
@@ -912,6 +996,11 @@ function renderOrderCard(doc) {
         ${stepsHtml}
     </div>`;
 }
+
+// ГАЛЕРЕЯ
+let galIdx = 0;
+function goGallery(i) { galIdx = i; document.getElementById('gallery-slides').style.transform = `translateX(-${i*100}%)`; document.querySelectorAll('.gallery-dot').forEach((d,j)=>d.classList.toggle('active',j===i)); }
+setInterval(() => goGallery((galIdx+1)%3), 4800);
 
 // СТАРТ
 updateCartUI();
