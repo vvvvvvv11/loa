@@ -771,16 +771,13 @@ function payWithYooMoney() {
     document.getElementById('autoYooForm').submit();
 }
 
-// ОФОРМЛЕНИЕ ЗАКАЗА (без изменений)
-const TG_ADMINS = ['530361815', '7984183942'];
+
 function sendTG(msg) {
-    TG_ADMINS.forEach(chatId => {
-        fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({chat_id: chatId, text: msg, parse_mode: 'HTML'})
-        }).catch(e => console.log('TG err:', e));
-    });
+    fetch('/api/send-telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+    }).catch(err => console.log('TG error:', err));
 }
 
 let selectedPvz = null;
