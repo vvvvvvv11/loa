@@ -750,18 +750,13 @@ function updateWishUI() {
 }
 function toggleWishSidebar() { document.getElementById('wish-sidebar').classList.toggle('open'); document.getElementById('wish-overlay').classList.toggle('open'); }
 
-// TELEGRAM УВЕДОМЛЕНИЯ (без изменений)
-const TG_TOKEN = '8702046980:AAGhDyL4ArgIZckT3PxusNVDHpX6E_cVjOA';
-const TG_CHAT_ID = '7984183942';
-const TG_ADMIN_2 = '530361815';
 
-function sendTelegramNotification(message) {
-    [TG_CHAT_ID, TG_ADMIN_2].forEach(chatId => {
-        fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
-        }).catch(err => console.log('TG error:', err));
+
+async function sendTelegramNotification(message) {
+    await fetch('/api/send-telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
     });
 }
 
