@@ -1025,7 +1025,9 @@ function submitOrder() {
     const orderId = crypto.randomUUID();
     const orderData = {
         id: orderId,
-        uid: currentUser ? currentUser.uid : null,
+        uid: null, // важно: uid обязан быть пустым — по нему create-payment сверяет
+                   // "гостевой" статус заказа, а у Firebase-покупателей нет Supabase-сессии
+        firebase_uid: currentUser ? currentUser.uid : null,
         name: name,
         phone: phone,
         tg: tg,
